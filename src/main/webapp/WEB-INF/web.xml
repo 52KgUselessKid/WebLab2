@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         version="5.0">
+  <display-name>AreaCheck</display-name>
+
+  <!-- контроллер доступен по /app -->
+  <servlet>
+    <servlet-name>ControllerServlet</servlet-name>
+    <servlet-class>com.example.areacheck.ControllerServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ControllerServlet</servlet-name>
+    <url-pattern>/app</url-pattern>
+  </servlet-mapping>
+
+  <!-- AreaCheckServlet -->
+  <servlet>
+    <servlet-name>AreaCheckServlet</servlet-name>
+    <servlet-class>com.example.areacheck.AreaCheckServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AreaCheckServlet</servlet-name>
+    <url-pattern>/AreaCheck</url-pattern>
+  </servlet-mapping>
+
+  <!-- Укажем welcome -->
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+</web-app>

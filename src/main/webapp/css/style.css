@@ -1,0 +1,257 @@
+body {
+    font-family: Arial;
+    margin: 0;
+    padding: 20px;
+    background: url("../img/shrek.jpg") no-repeat center center fixed;
+    background-repeat: repeat;
+    background-size: 400px auto;
+    color: #222;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px 30px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#main-header {
+    margin-bottom: 20px;
+}
+
+#main-header h1 {
+    font-family: cursive;
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.student-info {
+    font-family: cursive;
+    font-size: 20px;
+    color: #000000;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+label {
+    font-weight: bold;
+}
+
+.x-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.x-btn {
+    padding: 5px 8px;
+    border: 1px solid #aaa;
+    background: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.x-btn:hover {
+    background: #e9e9e9;
+}
+
+.x-btn.active {
+    background: #0099ff;
+    color: white;
+    border-color: #0099ff;
+}
+
+input[type="text"] {
+    padding: 5px 6px;
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    width: 70px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+input[type="text"]:focus {
+    border-color: #0099ff;
+    outline: none;
+}
+
+button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+#submitBtn {
+    background: #0099ff;
+    color: #fff;
+}
+
+#submitBtn:hover {
+    background: #0080e6;
+}
+
+#clearBtn {
+    background: #777;
+    color: white;
+}
+
+#clearBtn:hover {
+    background: #666;
+}
+
+.error-message {
+    color: #d00;
+    font-size: 12px;
+    height: 14px;
+}
+
+.graph-container {
+    text-align: center;
+    margin-top: 20px;
+    position: relative;
+    display: inline-block;
+}
+
+#areaGraph {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#canvasPoint {
+    display: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 10;
+}
+
+#results {
+    margin-top: 25px;
+}
+
+#results h3 {
+    margin-bottom: 8px;
+}
+
+#resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+#resultsTable th,
+#resultsTable td {
+    border: 1px solid #aaa;
+    padding: 6px;
+    text-align: center;
+}
+
+#resultsTable th {
+    background: #e9f6ff;
+    color: #004c99;
+}
+
+.hit {
+    color: #0099ff;
+    font-weight: bold;
+}
+
+.miss {
+    color: #d00;
+    font-weight: bold;
+}
+
+#error-banner {
+    background: #ffdddd;
+    padding: 10px 15px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #a00000;
+    font-weight: bold;
+    display: none;
+    border-radius: 4px;
+    text-align: center;
+}
+
+#form-error {
+    color: #d00;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.r-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.r-btn {
+    padding: 5px 8px;
+    border: 1px solid #aaa;
+    background: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.r-btn:hover {
+    background: #e9e9e9;
+}
+
+.r-btn.active {
+    background: #0099ff;
+    color: white;
+    border-color: #0099ff;
+}
+
+.r-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.r-radios {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.radio-label {
+    cursor: pointer;
+    margin-left: 2px;
+}
+
+/* Стили для самих radio buttons (если хотите немного кастомизировать) */
+.r-radio {
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Можно добавить hover эффект */
+.r-radio:hover {
+    transform: scale(1.1);
+}

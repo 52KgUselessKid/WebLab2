@@ -1,0 +1,419 @@
+class PointChecker {
+    constructor() {
+        this.currentX = null;
+        this.currentR = null;
+        this.appContextPath = '';
+        this.init();
+    }
+
+    init() {
+        this.appContextPath = this.getContextPath();
+        this.setupEventListeners();
+        this.drawGraph();
+        this.restoreSelection();
+    }
+
+    getContextPath() {
+        const path = window.location.pathname;
+        const contextPath = path.substring(0, path.indexOf('/', 1));
+        return contextPath || '';
+    }
+
+    setupEventListeners() {
+        document.querySelectorAll('.x-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.selectXValue(e.target.dataset.value);
+            });
+        });
+
+        document.querySelectorAll('.r-radio').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            this.selectRValue(e.target.value);
+        }
+    });
+});
+
+        const yInput = document.getElementById('y');
+        if (yInput) {
+            yInput.addEventListener('input', (e) => {
+                this.validateY(e.target.value);
+            });
+        }
+
+        const form = document.getElementById('pointForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                if (!this.validateForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        const clearBtn = document.getElementById('clearBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (confirm('Вы уверены, что хотите очистить все результаты?')) {
+                    window.location.href = this.appContextPath + '/app?cmd=clear';
+                }
+            });
+        }
+
+        const canvas = document.getElementById('areaGraph');
+        if (canvas) {
+            canvas.addEventListener('click', (e) => {
+                this.handleCanvasClick(e);
+            });
+        }
+    }
+
+    selectXValue(value) {
+        this.currentX = value;
+        document.getElementById('x').value = value;
+        
+        document.querySelectorAll('.x-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.value === value) {
+                btn.classList.add('active');
+            }
+        });
+        
+        this.saveSelection();
+    }
+
+    selectRValue(value) {
+    this.currentR = value;
+    this.drawGraph(parseFloat(value));
+    this.saveSelection();
+}
+
+    validateY(value) {
+        const errorElement = document.getElementById('y-error');
+        if (!errorElement) return false;
+
+        const numValue = this.parseNumber(value);
+        
+        if (value === '') {
+            errorElement.textContent = '';
+            return false;
+        }
+
+        if (isNaN(numValue)) {
+            errorElement.textContent = 'Y должен быть числом';
+            return false;
+        }
+
+        if (numValue < -5 || numValue > 3) {
+            errorElement.textContent = 'Y должен быть в диапазоне от -5 до 3';
+            return false;
+        }
+
+        errorElement.textContent = '';
+        return true;
+    }
+
+    validateR(value) {
+    const errorElement = document.getElementById('r-error');
+    if (!errorElement) return false;
+
+    if (!value) {
+        errorElement.textContent = 'Выберите значение R';
+        return false;
+    }
+
+    const numValue = parseFloat(value);
+    if (isNaN(numValue) || numValue < 2 || numValue > 5) {
+        errorElement.textContent = 'R должен быть числом от 2 до 5';
+        return false;
+    }
+
+    errorElement.textContent = '';
+    return true;
+}
+
+    parseNumber(value) {
+        if (!value || value === '') return NaN;
+        const normalizedValue = value.replace(',', '.');
+        return parseFloat(normalizedValue);
+    }
+
+    validateForm() {
+    const xInput = document.getElementById('x');
+    const yInput = document.getElementById('y');
+    
+    // Получаем выбранный radio
+    const selectedRadio = document.querySelector('.r-radio:checked');
+    if (!selectedRadio) {
+        this.showError('Выберите значение R');
+        return false;
+    }
+    const rValue = selectedRadio.value;
+
+    if (!xInput.value) {
+        this.showError('Выберите значение X');
+        return false;
+    }
+
+    if (!yInput.value) {
+        this.showError('Введите значение Y');
+        return false;
+    }
+
+    const yValid = this.validateY(yInput.value);
+    const rValid = this.validateR(rValue);
+
+    if (!yValid || !rValid) {
+        this.showError('Исправьте ошибки в форме');
+        return false;
+    }
+
+    return true;
+}
+
+    drawGraph(r = 3) {
+    const canvas = document.getElementById('areaGraph');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const size = 300;
+    const center = size / 2;
+    const scale = size / 10;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // Координатные оси
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(center, 0);
+    ctx.lineTo(center, size);
+    ctx.moveTo(0, center);
+    ctx.lineTo(size, center);
+    ctx.stroke();
+
+    // Стрелки
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.moveTo(center, 0);
+    ctx.lineTo(center - 5, 10);
+    ctx.lineTo(center + 5, 10);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(size, center);
+    ctx.lineTo(size - 10, center - 5);
+    ctx.lineTo(size - 10, center + 5);
+    ctx.fill();
+
+    // Заполнение области
+    ctx.fillStyle = 'rgba(0, 123, 255, 0.4)';
+    ctx.strokeStyle = 'rgba(0, 123, 255, 0.8)';
+
+    // 1. Прямоугольник во II четверти (левая верхняя)
+    // Координаты: (0,0)(-R,0)(-R,R/2)(0,R/2)
+    const rectX = center - r * scale; // -R (левый верхний угол)
+    const rectY = center - (r/2) * scale; // R/2 (помним, что Y растет вниз)
+    const rectWidth = r * scale; // ширина R
+    const rectHeight = (r/2) * scale; // высота R/2
+    
+    ctx.beginPath();
+    ctx.rect(rectX, rectY, rectWidth, rectHeight);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 2. 1/4 окружности в III четверти (левая нижняя)
+    // Центр в (0,0), радиус R/2, угол от π до 1.5π
+    ctx.beginPath();
+    ctx.moveTo(center, center); // начинаем от центра
+    ctx.arc(center, center, (r/2) * scale, 0.5 * Math.PI, Math.PI, false);
+    ctx.closePath(); // закрываем путь к центру
+    ctx.fill();
+    ctx.stroke();
+
+    // 3. Треугольник в IV четверти (правая нижняя)
+    // Вершины: (0,0)(0,-R/2)(R/2,0)
+    ctx.beginPath();
+    ctx.moveTo(center, center); // (0,0)
+    ctx.lineTo(center, center + (r/2) * scale); // (0,-R/2) - вниз от центра
+    ctx.lineTo(center + (r/2) * scale, center); // (R/2,0) - вправо от центра
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Подписи осей
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+
+    for (let i = -5; i <= 5; i++) {
+        if (i !== 0) {
+            const x = center + i * scale;
+            const y = center - i * scale;
+
+            // Деления на оси X
+            ctx.beginPath();
+            ctx.moveTo(x, center - 3);
+            ctx.lineTo(x, center + 3);
+            ctx.stroke();
+            ctx.fillText(i, x, center + 15);
+
+            // Деления на оси Y
+            ctx.beginPath();
+            ctx.moveTo(center - 3, y);
+            ctx.lineTo(center + 3, y);
+            ctx.stroke();
+            ctx.fillText(i, center - 15, y + 4);
+        }
+    }
+
+    // Подписи осей X и Y
+    ctx.fillText('X', size - 10, center - 10);
+    ctx.fillText('Y', center + 10, 10);
+
+    // Добавляем точки из результатов
+    this.drawSavedPoints(r);
+}
+
+    handleCanvasClick(e) {
+         const canvas = document.getElementById('areaGraph');
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const size = canvas.width;
+    const center = size / 2;
+    const scale = size / 10;
+
+    // Получаем выбранный radio
+    const selectedRadio = document.querySelector('.r-radio:checked');
+    if (!selectedRadio) {
+        this.showError('Сначала выберите значение R');
+        return;
+    }
+    const rValue = this.parseNumber(selectedRadio.value);
+
+        // Преобразуем координаты канваса в математические координаты
+        const realX = (x - center) / scale;
+        const realY = (center - y) / scale;
+
+        // Ограничиваем значения согласно условиям
+        const clampedX = Math.max(-5, Math.min(3, Math.round(realX * 100) / 100));
+        const clampedY = Math.max(-5, Math.min(3, Math.round(realY * 100) / 100));
+
+        // Устанавливаем значения
+        document.getElementById('y').value = clampedY;
+        
+        // Находим ближайшую кнопку X
+        const xButtons = Array.from(document.querySelectorAll('.x-btn'));
+        const closestXBtn = xButtons.reduce((prev, curr) => {
+            const prevDiff = Math.abs(parseFloat(prev.dataset.value) - clampedX);
+            const currDiff = Math.abs(parseFloat(curr.dataset.value) - clampedX);
+            return currDiff < prevDiff ? curr : prev;
+        });
+        
+        this.selectXValue(closestXBtn.dataset.value);
+
+        // Показываем точку на графике
+        const point = document.getElementById('canvasPoint');
+        point.style.left = (x + rect.left) + 'px';
+        point.style.top = (y + rect.top) + 'px';
+        point.style.display = 'block';
+
+        // Сразу отправляем форму
+        setTimeout(() => {
+            document.getElementById('pointForm').submit();
+        }, 100);
+    }
+
+    drawSavedPoints(r) {
+        const rows = document.querySelectorAll('#resultsBody tr');
+        const canvas = document.getElementById('areaGraph');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        const center = canvas.width / 2;
+        const scale = canvas.width / 10;
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 6) {
+                const pointR = this.parseNumber(cells[2].textContent);
+                if (Math.abs(pointR - r) < 0.001) { // Только точки с текущим R
+                    const x = this.parseNumber(cells[0].textContent);
+                    const y = this.parseNumber(cells[1].textContent);
+                    const isHit = cells[3].classList.contains('hit');
+
+                    const pointX = center + x * scale;
+                    const pointY = center - y * scale;
+
+                    ctx.fillStyle = isHit ? '#4CAF50' : '#dc3545';
+                    ctx.beginPath();
+                    ctx.arc(pointX, pointY, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        });
+    }
+
+    saveSelection() {
+    try {
+        if (this.currentX) {
+            localStorage.setItem('selectedX', this.currentX);
+        }
+        if (this.currentR) {
+            localStorage.setItem('selectedR', this.currentR);
+        }
+    } catch (e) {
+        console.error('Error saving selection:', e);
+    }
+}
+
+    restoreSelection() {
+    try {
+        const savedX = localStorage.getItem('selectedX');
+        const savedR = localStorage.getItem('selectedR');
+        
+        if (savedX) {
+            this.selectXValue(savedX);
+        }
+        
+        if (savedR) {
+            const radio = document.querySelector(`.r-radio[value="${savedR}"]`);
+            if (radio) {
+                radio.checked = true;
+                this.drawGraph(parseFloat(savedR));
+            }
+        } else {
+            // Значение по умолчанию
+            const defaultRadio = document.querySelector('.r-radio[value="3"]');
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+                this.drawGraph(3);
+            }
+        }
+    } catch (e) {
+        console.error('Error restoring selection:', e);
+        const defaultRadio = document.querySelector('.r-radio[value="3"]');
+        if (defaultRadio) {
+            defaultRadio.checked = true;
+            this.drawGraph(3);
+        }
+    }
+}
+
+    showError(message) {
+        const banner = document.getElementById('error-banner');
+        if (banner) {
+            banner.textContent = message;
+            banner.style.display = "block";
+
+            setTimeout(() => {
+                banner.style.display = "none";
+            }, 4000);
+        }
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    new PointChecker();
+});
