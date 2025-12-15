@@ -3,7 +3,6 @@
          version="5.0">
   <display-name>AreaCheck</display-name>
 
-  <!-- контроллер доступен по /app -->
   <servlet>
     <servlet-name>ControllerServlet</servlet-name>
     <servlet-class>com.example.areacheck.ControllerServlet</servlet-class>
@@ -13,7 +12,6 @@
     <url-pattern>/app</url-pattern>
   </servlet-mapping>
 
-  <!-- AreaCheckServlet -->
   <servlet>
     <servlet-name>AreaCheckServlet</servlet-name>
     <servlet-class>com.example.areacheck.AreaCheckServlet</servlet-class>
@@ -23,7 +21,6 @@
     <url-pattern>/AreaCheck</url-pattern>
   </servlet-mapping>
 
-  <!-- Укажем welcome -->
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>

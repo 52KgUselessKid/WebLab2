@@ -92,7 +92,7 @@
                         <%= rec.isHit() ? "Попадание" : "Промах" %>
                     </td>
                     <td><%= rec.getTime() %></td>
-                    <td><%= rec.getExecMillis() %> мс</td>
+                    <td><%= String.format("%.3f мс", rec.getExecMillis() / 1000000.0) %></td>
                 </tr>
                 <%
                         }

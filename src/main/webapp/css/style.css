@@ -245,13 +245,11 @@ button {
     margin-left: 2px;
 }
 
-/* Стили для самих radio buttons (если хотите немного кастомизировать) */
 .r-radio {
     margin: 0;
     cursor: pointer;
 }
 
-/* Можно добавить hover эффект */
 .r-radio:hover {
     transform: scale(1.1);
 }

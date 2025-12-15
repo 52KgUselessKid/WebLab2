@@ -50,14 +50,40 @@ class PointChecker {
             });
         }
 
-        const clearBtn = document.getElementById('clearBtn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
-                if (confirm('Вы уверены, что хотите очистить все результаты?')) {
-                    window.location.href = this.appContextPath + '/app?cmd=clear';
+const clearBtn = document.getElementById('clearBtn');
+if (clearBtn) {
+    clearBtn.addEventListener('click', async () => {
+        if (confirm('Вы уверены, что хотите очистить все результаты?')) {
+            try {
+                const tbody = document.getElementById('resultsBody');
+                if (tbody) {
+                    tbody.innerHTML = '';
                 }
-            });
+                
+                localStorage.removeItem('selectedX');
+                localStorage.removeItem('selectedR');
+                
+                const selectedRadio = document.querySelector('.r-radio:checked');
+                if (selectedRadio) {
+                    this.drawGraph(parseFloat(selectedRadio.value));
+                } else {
+                    this.drawGraph(3);
+                }
+                
+                const response = await fetch(this.appContextPath + '/app?cmd=clear');
+                
+                if (response.ok) {
+                    this.showError('Результаты успешно очищены');
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (error) {
+                console.error('Error clearing results:', error);
+                this.showError('Ошибка при очистке результатов');
+            }
         }
+    });
+}
 
         const canvas = document.getElementById('areaGraph');
         if (canvas) {
@@ -141,7 +167,7 @@ class PointChecker {
     const xInput = document.getElementById('x');
     const yInput = document.getElementById('y');
     
-    // Получаем выбранный radio
+
     const selectedRadio = document.querySelector('.r-radio:checked');
     if (!selectedRadio) {
         this.showError('Выберите значение R');
@@ -181,7 +207,6 @@ class PointChecker {
 
     ctx.clearRect(0, 0, size, size);
 
-    // Координатные оси
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -191,7 +216,6 @@ class PointChecker {
     ctx.lineTo(size, center);
     ctx.stroke();
 
-    // Стрелки
     ctx.fillStyle = '#000';
     ctx.beginPath();
     ctx.moveTo(center, 0);
@@ -204,16 +228,13 @@ class PointChecker {
     ctx.lineTo(size - 10, center + 5);
     ctx.fill();
 
-    // Заполнение области
     ctx.fillStyle = 'rgba(0, 123, 255, 0.4)';
     ctx.strokeStyle = 'rgba(0, 123, 255, 0.8)';
 
-    // 1. Прямоугольник во II четверти (левая верхняя)
-    // Координаты: (0,0)(-R,0)(-R,R/2)(0,R/2)
-    const rectX = center - r * scale; // -R (левый верхний угол)
-    const rectY = center - (r/2) * scale; // R/2 (помним, что Y растет вниз)
-    const rectWidth = r * scale; // ширина R
-    const rectHeight = (r/2) * scale; // высота R/2
+    const rectX = center - r * scale;
+    const rectY = center - (r/2) * scale;
+    const rectWidth = r * scale;
+    const rectHeight = (r/2) * scale;
     
     ctx.beginPath();
     ctx.rect(rectX, rectY, rectWidth, rectHeight);
@@ -221,26 +242,21 @@ class PointChecker {
     ctx.fill();
     ctx.stroke();
 
-    // 2. 1/4 окружности в III четверти (левая нижняя)
-    // Центр в (0,0), радиус R/2, угол от π до 1.5π
     ctx.beginPath();
-    ctx.moveTo(center, center); // начинаем от центра
+    ctx.moveTo(center, center);
     ctx.arc(center, center, (r/2) * scale, 0.5 * Math.PI, Math.PI, false);
-    ctx.closePath(); // закрываем путь к центру
-    ctx.fill();
-    ctx.stroke();
-
-    // 3. Треугольник в IV четверти (правая нижняя)
-    // Вершины: (0,0)(0,-R/2)(R/2,0)
-    ctx.beginPath();
-    ctx.moveTo(center, center); // (0,0)
-    ctx.lineTo(center, center + (r/2) * scale); // (0,-R/2) - вниз от центра
-    ctx.lineTo(center + (r/2) * scale, center); // (R/2,0) - вправо от центра
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Подписи осей
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.lineTo(center, center + (r/2) * scale);
+    ctx.lineTo(center + (r/2) * scale, center);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
     ctx.fillStyle = '#000';
     ctx.font = '12px Arial';
     ctx.textAlign = 'center';
@@ -250,14 +266,12 @@ class PointChecker {
             const x = center + i * scale;
             const y = center - i * scale;
 
-            // Деления на оси X
             ctx.beginPath();
             ctx.moveTo(x, center - 3);
             ctx.lineTo(x, center + 3);
             ctx.stroke();
             ctx.fillText(i, x, center + 15);
 
-            // Деления на оси Y
             ctx.beginPath();
             ctx.moveTo(center - 3, y);
             ctx.lineTo(center + 3, y);
@@ -266,16 +280,14 @@ class PointChecker {
         }
     }
 
-    // Подписи осей X и Y
     ctx.fillText('X', size - 10, center - 10);
     ctx.fillText('Y', center + 10, 10);
 
-    // Добавляем точки из результатов
     this.drawSavedPoints(r);
 }
 
     handleCanvasClick(e) {
-         const canvas = document.getElementById('areaGraph');
+    const canvas = document.getElementById('areaGraph');
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -283,26 +295,38 @@ class PointChecker {
     const center = size / 2;
     const scale = size / 10;
 
-    // Получаем выбранный radio
     const selectedRadio = document.querySelector('.r-radio:checked');
     if (!selectedRadio) {
         this.showError('Сначала выберите значение R');
         return;
     }
     const rValue = this.parseNumber(selectedRadio.value);
+    
+    if (isNaN(rValue) || !rValue) {
+        this.showError('Сначала выберите значение R');
+        return;
+    }
 
-        // Преобразуем координаты канваса в математические координаты
-        const realX = (x - center) / scale;
-        const realY = (center - y) / scale;
+    const realX = (x - center) / scale;
+    const realY = (center - y) / scale;
 
-        // Ограничиваем значения согласно условиям
-        const clampedX = Math.max(-5, Math.min(3, Math.round(realX * 100) / 100));
-        const clampedY = Math.max(-5, Math.min(3, Math.round(realY * 100) / 100));
+    const clampedX = Math.max(-5, Math.min(3, Math.round(realX * 100) / 100));
+    const clampedY = Math.max(-5, Math.min(3, Math.round(realY * 100) / 100));
 
-        // Устанавливаем значения
-        document.getElementById('y').value = clampedY;
+    document.getElementById('y').value = clampedY;
+    
+    const xTextInput = document.getElementById('x');
+    if (xTextInput && xTextInput.type === 'text') {
+        xTextInput.value = clampedX;
+        this.validateX(clampedX);
+    } else {
+        const xHiddenInput = document.getElementById('x');
+        xHiddenInput.value = clampedX;
         
-        // Находим ближайшую кнопку X
+        document.querySelectorAll('.x-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
         const xButtons = Array.from(document.querySelectorAll('.x-btn'));
         const closestXBtn = xButtons.reduce((prev, curr) => {
             const prevDiff = Math.abs(parseFloat(prev.dataset.value) - clampedX);
@@ -310,19 +334,20 @@ class PointChecker {
             return currDiff < prevDiff ? curr : prev;
         });
         
-        this.selectXValue(closestXBtn.dataset.value);
-
-        // Показываем точку на графике
-        const point = document.getElementById('canvasPoint');
-        point.style.left = (x + rect.left) + 'px';
-        point.style.top = (y + rect.top) + 'px';
-        point.style.display = 'block';
-
-        // Сразу отправляем форму
-        setTimeout(() => {
-            document.getElementById('pointForm').submit();
-        }, 100);
+        if (closestXBtn) {
+            closestXBtn.classList.add('active');
+        }
     }
+    
+    const point = document.getElementById('canvasPoint');
+    point.style.left = (x + rect.left) + 'px';
+    point.style.top = (y + rect.top) + 'px';
+    point.style.display = 'block';
+
+    setTimeout(() => {
+        document.getElementById('pointForm').submit();
+    }, 100);
+}
 
     drawSavedPoints(r) {
         const rows = document.querySelectorAll('#resultsBody tr');
@@ -337,7 +362,7 @@ class PointChecker {
             const cells = row.querySelectorAll('td');
             if (cells.length >= 6) {
                 const pointR = this.parseNumber(cells[2].textContent);
-                if (Math.abs(pointR - r) < 0.001) { // Только точки с текущим R
+                if (Math.abs(pointR - r) < 0.001) {
                     const x = this.parseNumber(cells[0].textContent);
                     const y = this.parseNumber(cells[1].textContent);
                     const isHit = cells[3].classList.contains('hit');
@@ -383,7 +408,6 @@ class PointChecker {
                 this.drawGraph(parseFloat(savedR));
             }
         } else {
-            // Значение по умолчанию
             const defaultRadio = document.querySelector('.r-radio[value="3"]');
             if (defaultRadio) {
                 defaultRadio.checked = true;
@@ -413,7 +437,6 @@ class PointChecker {
     }
 }
 
-// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     new PointChecker();
 });

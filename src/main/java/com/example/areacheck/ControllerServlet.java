@@ -17,7 +17,6 @@ public class ControllerServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // В задании указан GET; если хочется поддержать POST, можно перенаправить сюда.
         dispatch(req, resp);
     }
 
@@ -27,18 +26,14 @@ public class ControllerServlet extends HttpServlet {
         String r = req.getParameter("r");
 
         if (x != null && y != null && r != null) {
-            // forward to AreaCheckServlet for processing
             req.getRequestDispatcher("/AreaCheck").forward(req, resp);
         } else {
-            // show form (JSP)
             req.getRequestDispatcher("/WEB-INF/jsp/form.jsp").forward(req, resp);
         }
         String cmd = req.getParameter("cmd");
         if ("clear".equals(cmd)) {
             req.getSession().removeAttribute("results");
             resp.sendRedirect(req.getContextPath() + "/app");
-            return;
         }
-
     }
 }
