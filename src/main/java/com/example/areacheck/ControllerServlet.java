@@ -15,11 +15,6 @@ public class ControllerServlet extends HttpServlet {
         dispatch(req, resp);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        dispatch(req, resp);
-    }
-
     private void dispatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String x = req.getParameter("x");
         String y = req.getParameter("y");
