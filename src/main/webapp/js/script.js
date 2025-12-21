@@ -50,40 +50,40 @@ class PointChecker {
             });
         }
 
-const clearBtn = document.getElementById('clearBtn');
-if (clearBtn) {
-    clearBtn.addEventListener('click', async () => {
-        if (confirm('Вы уверены, что хотите очистить все результаты?')) {
-            try {
-                const tbody = document.getElementById('resultsBody');
-                if (tbody) {
-                    tbody.innerHTML = '';
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', async () => {
+            if (confirm('Вы уверены, что хотите очистить все результаты?')) {
+                try {
+                    const tbody = document.getElementById('resultsBody');
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                    }
+                    
+                    localStorage.removeItem('selectedX');
+                    localStorage.removeItem('selectedR');
+                    
+                    const selectedRadio = document.querySelector('.r-radio:checked');
+                    if (selectedRadio) {
+                        this.drawGraph(parseFloat(selectedRadio.value));
+                    } else {
+                        this.drawGraph(3);
+                    }
+                    
+                    const response = await fetch(this.appContextPath + '/app?cmd=clear');
+                    
+                    if (response.ok) {
+                        this.showError('Результаты успешно очищены');
+                    } else {
+                        throw new Error('Server error');
+                    }
+                } catch (error) {
+                    console.error('Error clearing results:', error);
+                    this.showError('Ошибка при очистке результатов');
                 }
-                
-                localStorage.removeItem('selectedX');
-                localStorage.removeItem('selectedR');
-                
-                const selectedRadio = document.querySelector('.r-radio:checked');
-                if (selectedRadio) {
-                    this.drawGraph(parseFloat(selectedRadio.value));
-                } else {
-                    this.drawGraph(3);
-                }
-                
-                const response = await fetch(this.appContextPath + '/app?cmd=clear');
-                
-                if (response.ok) {
-                    this.showError('Результаты успешно очищены');
-                } else {
-                    throw new Error('Server error');
-                }
-            } catch (error) {
-                console.error('Error clearing results:', error);
-                this.showError('Ошибка при очистке результатов');
             }
-        }
-    });
-}
+        });
+    }
 
         const canvas = document.getElementById('areaGraph');
         if (canvas) {

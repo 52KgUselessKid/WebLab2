@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.example.areacheck.ResultRecord" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <%
     String fio = "Кабиров Данияр Умарович";
     String group = "P3223";
@@ -64,6 +65,11 @@
             <div id="canvasPoint"></div>
         </div>
 
+        <%
+            DateTimeFormatter timeFormatter =
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+        %>
+
         <div id="results">
             <h3>Результаты</h3>
             <table id="resultsTable">
@@ -91,7 +97,7 @@
                     <td class="<%= rec.isHit() ? "hit" : "miss" %>">
                         <%= rec.isHit() ? "Попадание" : "Промах" %>
                     </td>
-                    <td><%= rec.getTime() %></td>
+                    <td><%= rec.getTime().format(timeFormatter) %></td>
                     <td><%= String.format("%.3f мс", rec.getExecMillis() / 1000000.0) %></td>
                 </tr>
                 <%
