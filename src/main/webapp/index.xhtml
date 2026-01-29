@@ -1,0 +1,40 @@
+<!-- index.xhtml -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>Лабораторная работа №2</title>
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+
+<h:body>
+
+    <div class="container">
+
+        <header id="main-header">
+            <h1>Лабораторная работа №2</h1>
+            <div class="student-info">
+                <span>Кабиров Данияр Умарович</span>
+                <span>Группа: P3223</span>
+                <span>Вариант: 2555</span>
+            </div>
+        </header>
+
+        <div style="margin-top: 20px; font-size: 18px;">
+            <p:poll interval="13" update="clock"/>
+            <h:outputText id="clock" value="#{clockBean.currentTime}"/>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h:link value="Перейти к приложению"
+                    outcome="/app.xhtml"
+                    style="font-size: 18px; color: #0099ff;"/>
+        </div>
+
+    </div>
+
+</h:body>
+</html>
