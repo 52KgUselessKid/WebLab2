@@ -3,19 +3,19 @@ package com.example.areacheck.beans;
 import com.example.areacheck.model.ResultEntity;
 import com.example.areacheck.util.AreaChecker;
 import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
-
-@Named("pointBean")
-@SessionScoped
-public class PointBean implements Serializable {
+@Named("pBean")
+@ViewScoped
+public class PBean implements Serializable {
 
     private double x;
     private double y;
@@ -25,7 +25,6 @@ public class PointBean implements Serializable {
 
     private List<Double> xValues;
     private List<Double> rValues;
-
 
     @Inject
     private ResultsBean resultsBean;
@@ -39,6 +38,8 @@ public class PointBean implements Serializable {
         y = 0;
         r = 1;
         result = "Введите значения";
+
+        System.out.println(">>> NEW PBean INIT OK");
     }
 
     public void submit() {
@@ -54,7 +55,6 @@ public class PointBean implements Serializable {
         result = hit ? "Попадание!" : "Промах!";
     }
 
-    // Getters и Setters
     public double getX() { return x; }
     public void setX(double x) { this.x = x; }
 
@@ -67,12 +67,5 @@ public class PointBean implements Serializable {
     public String getResult() { return result; }
 
     public List<Double> getXValues() { return xValues; }
-    public void setXValues(List<Double> xValues) {
-        this.xValues = xValues;
-    }
-
     public List<Double> getRValues() { return rValues; }
-    public void setRValues(List<Double> rValues) {
-        this.rValues = rValues;
-    }
 }

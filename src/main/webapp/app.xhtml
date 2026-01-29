@@ -32,25 +32,25 @@
 
                 <!-- X -->
                 <label>X:</label>
-                <p:selectOneButton value="#{pointBean.x}">
-                    <f:selectItems value="#{pointBean.xValues}" var="item" itemValue="#{item}" itemLabel="#{item}"/>
+                <p:selectOneButton value="#{pBean.x}">
+                    <f:selectItems value="#{pBean.xValues}" />
                 </p:selectOneButton>
 
                 <!-- Y -->
                 <label>Y:</label>
-                <p:inputText value="#{pointBean.y}" style="width:70px">
+                <p:inputText value="#{pBean.y}" style="width:70px">
                     <f:validateDoubleRange minimum="-5" maximum="3"/>
                 </p:inputText>
 
                 <!-- R -->
                 <label>R:</label>
-                <p:selectOneRadio value="#{pointBean.r}">
-                    <f:selectItems value="#{pointBean.rValues}"/>
+                <p:selectOneRadio value="#{pBean.r}">
+                    <f:selectItems value="#{pBean.rValues}"/>
                     <p:ajax update="graph"/>
                 </p:selectOneRadio>
 
                 <p:commandButton value="Проверить"
-                                 action="#{pointBean.submit}"
+                                 action="#{pBean.submit}"
                                  update="resultsTable graph"
                                  styleClass="ui-button-primary"/>
             </div>
