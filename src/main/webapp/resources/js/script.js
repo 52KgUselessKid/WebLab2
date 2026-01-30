@@ -47,11 +47,35 @@ class PointChecker {
         }
     }
     selectXValue(value) {
-        this.currentX = value;
-        document.getElementById('pointForm:hiddenX').value = value;
+        // value может быть реальным X (-5..5) или процентом — приводим к числу
+        const num = this.parseNumber(value);
+        if (isNaN(num)) return;
+
+        // Если значение в диапазоне -5..5 — переводим в процент
+        let percent;
+        if (num >= -5 && num <= 5) {
+            percent = Math.round(((num + 5) / 10) * 100);
+        } else if (num >= 0 && num <= 100) {
+            percent = Math.round(num);
+        } else {
+            // неизвестный формат — игнорируем
+            return;
+        }
+
+        this.currentX = percent;
+        const hidden = document.getElementById('pointForm:hiddenX');
+        if (hidden) hidden.value = percent;
+
+        // Обновляем отображение
+        const display = document.getElementById('pointForm:xDisplay');
+        if (display) {
+            const real = -5 + (percent / 100) * 10;
+            display.innerText = real.toFixed(2);
+        }
 
         this.saveSelection();
     }
+
     selectRValue(value) {
     this.currentR = value;
     drawGraph(parseFloat(value));
@@ -126,6 +150,7 @@ class PointChecker {
 
     handleCanvasClick(e) {
         const canvas = document.getElementById('areaGraph');
+        if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const clickY = e.clientY - rect.top;
@@ -133,62 +158,105 @@ class PointChecker {
         const center = size / 2;
         const scale = size / 10;
 
-        // 1. Пытаемся взять из checked радио
+        // Получаем R (как в вашем коде)
         let selectedRadio = document.querySelector('.r-radio:checked');
         let rValue = null;
-
         if (selectedRadio) {
             rValue = this.parseNumber(selectedRadio.value);
         }
-
-        // 2. Если не нашли — берём из hidden поля (самый надёжный запасной вариант)
         if (!rValue || isNaN(rValue)) {
             const hiddenR = document.getElementById('pointForm:r');
             if (hiddenR && hiddenR.value) {
                 rValue = this.parseNumber(hiddenR.value);
-                console.log("R взят из hidden поля:", rValue);
             }
         }
-
-        // 3. Если всё равно ничего — дефолт 3 и принудительно отмечаем
         if (!rValue || isNaN(rValue) || rValue < 1) {
             rValue = 3;
             const defRadio = document.querySelector('.r-radio[value="3"]');
             if (defRadio) {
                 defRadio.checked = true;
-                document.getElementById('pointForm:r').value = '3';
+                const hiddenR = document.getElementById('pointForm:r');
+                if (hiddenR) hiddenR.value = '3';
                 drawGraph(3);
             }
-            console.log("R принудительно установлен на 3");
         }
 
+        // Реальные координаты в единицах (-5..5)
         const realX = (clickX - center) / scale;
         const realY = (center - clickY) / scale;
 
         const clampedX = Math.max(-5, Math.min(5, Math.round(realX * 100) / 100));
         const clampedY = Math.max(-5, Math.min(5, Math.round(realY * 100) / 100));
 
+        // Переводим clampedX в процент 0..100 (для slider/hiddenX)
+        const min = -5;
+        const max = 5;
+        const percentX = Math.round(((clampedX - min) / (max - min)) * 100);
 
-        document.getElementById('pointForm:hiddenX').value = clampedX;
-        document.getElementById('pointForm:y').value = clampedY;
-        document.getElementById('pointForm:r').value = rValue;  // ← перестраховка
+        // Записываем в hiddenX (процент) и диспатчим события, чтобы JSF/PrimeFaces увидели изменение
+        const hiddenX = document.getElementById('pointForm:hiddenX');
+        if (hiddenX) {
+            hiddenX.value = percentX;
 
-        // Показываем временную точку
+            // Сигнализируем о изменении — dispatch input/change
+            const inputEvent = new Event('input', { bubbles: true });
+            const changeEvent = new Event('change', { bubbles: true });
+            hiddenX.dispatchEvent(inputEvent);
+            hiddenX.dispatchEvent(changeEvent);
+        }
+
+        // Записываем Y в поле (реальные единицы)
+        const yInput = document.getElementById('pointForm:y');
+        if (yInput) {
+            yInput.value = clampedY;
+            // тоже диспатчим, чтобы валидация/PrimeFaces увидели
+            yInput.dispatchEvent(new Event('input', { bubbles: true }));
+            yInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // Перестраховка R
+        const hiddenR = document.getElementById('pointForm:r');
+        if (hiddenR) hiddenR.value = rValue;
+
+        // Показываем временную точку (позиционируем относительно окна)
         const point = document.getElementById('canvasPoint');
-        point.style.left = `${clickX + rect.left}px`;
-        point.style.top = `${clickY + rect.top}px`;
-        point.style.display = 'block';
+        if (point) {
+            // позиционируем относительно viewport (как у вас было)
+            point.style.left = `${clickX + rect.left}px`;
+            point.style.top = `${clickY + rect.top}px`;
+            point.style.display = 'block';
+        }
 
-        // Отправка
-        setTimeout(() => {
-            const submitBtn = document.getElementById('pointForm:checkBtn') || document.querySelector('[id*="checkBtn"]');
-            if (submitBtn) {
-                submitBtn.click();
-            } else {
-                document.getElementById('pointForm').submit();
-            }
-        }, 100);
+        // Обновляем отображение X рядом со слайдером (в реальных единицах)
+        const display = document.getElementById('pointForm:xDisplay');
+        if (display) {
+            const realForDisplay = min + (percentX / 100) * (max - min);
+            display.innerText = realForDisplay.toFixed(2);
+        }
+
+        // Надёжный поиск кнопки отправки: ищем элемент, id которого оканчивается на submitBtn
+        // (это работает независимо от префикса clientId)
+        const submitBtn = document.querySelector('[id$="submitBtn"], [id$="checkBtn"]');
+
+        // Если нашли — кликаем по ней; иначе — отправляем форму нативно
+        if (submitBtn) {
+            // Небольшая задержка 0..50ms помогает избежать гонок с обновлением DOM/виджетов
+            setTimeout(() => {
+                try {
+                    submitBtn.click();
+                } catch (err) {
+                    // fallback: нативная отправка формы
+                    const form = document.getElementById('pointForm');
+                    if (form) form.submit();
+                }
+            }, 20);
+        } else {
+            const form = document.getElementById('pointForm');
+            if (form) form.submit();
+        }
     }
+
+
 
     saveSelection() {
     try {
@@ -243,8 +311,6 @@ class PointChecker {
 document.addEventListener('DOMContentLoaded', () => {
     new PointChecker();
 });
-
-window.pointChecker = new PointChecker();
 
 function drawSavedPoints(r) {
 console.log("drawSavedPoints вызван с r =", r);
@@ -457,33 +523,20 @@ function updateR(checkbox, intendedR) {
  }
 
  function adjustSliderValue() {
-     // Берём значение из hidden-поля (оно обновляется PrimeFaces при движении слайдера)
      const hiddenInput = document.getElementById('pointForm:hiddenX');
-     if (!hiddenInput) {
-         console.warn("hiddenX не найден");
-         return;
-     }
+     if (!hiddenInput) return;
 
-     let rawValue = parseFloat(hiddenInput.value);
+     let rawPercent = parseFloat(hiddenInput.value);
+     if (isNaN(rawPercent)) rawPercent = 50; // дефолт
 
-     // Если значение выглядит как процент (0–100), пересчитываем в реальный диапазон
-     if (!isNaN(rawValue) && rawValue >= 0 && rawValue <= 100) {
-         const min = -5;
-         const max = 5;
-         rawValue = min + (rawValue / 100) * (max - min);
-     }
+     const min = -5;
+     const max = 5;
+     const realValue = min + (rawPercent / 100) * (max - min);
+     const correctedValue = Math.round(realValue * 100) / 100;
 
-     // Округляем до 1 знака после запятой
-     const correctedValue = isNaN(rawValue) ? 0 : Math.round(rawValue * 10) / 10;
+     // Записываем обратно в hidden как процент (на случай, если мы пересчитали)
+     hiddenInput.value = Math.round(((correctedValue - min) / (max - min)) * 100);
 
-     // Записываем обратно в hidden (на всякий случай)
-     hiddenInput.value = correctedValue;
-
-     // Обновляем отображаемый текст
      const display = document.getElementById('pointForm:xDisplay');
-     if (display) {
-         display.innerText = correctedValue.toFixed(1);
-     }
-
-     console.log("Слайдер скорректирован →", correctedValue);
+     if (display) display.innerText = correctedValue.toFixed(2);
  }
