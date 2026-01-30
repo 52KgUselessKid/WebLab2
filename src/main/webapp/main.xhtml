@@ -26,10 +26,12 @@
 
                 <div class="form-row" style="flex-direction: column; align-items: center; gap: 16px;">
 
-                    <div style="width: 100%; max-width: 400px;">
-                        <label>X: </label>
+                    <div style="width: 100%; max-width: 400px; margin: 0 auto 20px auto;">
+                        <div style="text-align: center; margin-bottom: 8px;">
+                            <label>X: </label>
+                            <h:outputText id="xDisplay" value="#{pointBean.x}" style="font-weight: bold; font-size: 1.2em; color: #007bff;"/>
+                        </div>
 
-                        <!-- Hidden первый — важно порядок -->
                         <h:inputHidden id="hiddenX" value="#{pointBean.x}"/>
 
                         <p:slider id="xSlider"
@@ -38,9 +40,10 @@
                                   max="5"
                                   step="1"
                                   value="#{pointBean.x}"
-                                  displayValue="true"
-                                  displayValueTemplate="{value}"
-                                  style="width: 100%;"/>
+                                  displayValue="false"
+                                  onSlide="adjustSliderValue()"
+                        style="width: 100%;"/>
+
                     </div>
 
                     <!-- Y: p:inputText с валидацией -->
@@ -98,13 +101,15 @@
                         <p:commandButton id="submitBtn" value="Проверить"
                                          action="#{pointBean.check}"
                                          update="resultsPanel messages"
-                                         process="@form"/>
+                                         process="@form"
+                                         oncomplete="redrawCurrentGraph()"/>
 
                         <p:commandButton id="clearBtn" value="Очистить"
                                          action="#{pointBean.clear}"
                                          update="resultsPanel messages"
                                          process="@form"
-                                         onclick="return confirm('Очистить все результаты?');"/>
+                                         onclick="return confirm('Очистить все результаты?');"
+                                         oncomplete="redrawCurrentGraph()"/>
                     </div>
 
                     <p:messages id="messages" showDetail="true" closable="true"/>

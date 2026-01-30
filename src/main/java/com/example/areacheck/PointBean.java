@@ -29,7 +29,18 @@ public class PointBean implements Serializable {
 
     // Геттеры и сеттеры для X, Y, R (старые — оставляем)
     public double getX() { return x; }
-    public void setX(double x) { this.x = x; }
+    public void setX(double x) {
+        // Защита от мусора 0–100
+        if (x >= 0 && x <= 100) {
+            // Предполагаем, что это процент → пересчитываем
+            this.x = -5 + (x / 100.0) * 10;  // от -5 до 5
+        } else {
+            this.x = x;
+        }
+
+        // Дополнительная обрезка
+        //this.x = Math.max(-5, Math.min(5, x));  // жёстко обрезаем до допустимого
+    }
 
     public double getY() { return y; }
     public void setY(double y) { this.y = y; }

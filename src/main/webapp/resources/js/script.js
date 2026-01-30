@@ -6,10 +6,11 @@ class PointChecker {
         this.init();
     }
     init() {
-        this.appContextPath = this.getContextPath();
-        this.setupEventListeners();
-        drawGraph();
-        this.restoreSelection();
+        localStorage.clear();
+       this.appContextPath = this.getContextPath();
+           this.setupEventListeners();
+           this.restoreSelection();   // ← сначала восстанавливаем выбор
+           drawGraph();
     }
     getContextPath() {
         const path = window.location.pathname;
@@ -17,13 +18,13 @@ class PointChecker {
         return contextPath || '';
     }
     setupEventListeners() {
-        document.querySelectorAll('.r-radio').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            this.selectRValue(e.target.value);
-        }
-    });
-});
+//        document.querySelectorAll('.r-radio').forEach(radio => {
+//    radio.addEventListener('change', (e) => {
+//        if (e.target.checked) {
+//            this.selectRValue(e.target.value);
+//        }
+//    });
+//});
         const yInput = document.getElementById('pointForm:y');
         if (yInput) {
             yInput.addEventListener('input', (e) => {
@@ -164,8 +165,9 @@ class PointChecker {
         const realX = (clickX - center) / scale;
         const realY = (center - clickY) / scale;
 
-        const clampedX = Math.max(-5, Math.min(3, Math.round(realX * 100) / 100));
-        const clampedY = Math.max(-5, Math.min(3, Math.round(realY * 100) / 100));
+        const clampedX = Math.max(-5, Math.min(5, Math.round(realX * 100) / 100));
+        const clampedY = Math.max(-5, Math.min(5, Math.round(realY * 100) / 100));
+
 
         document.getElementById('pointForm:hiddenX').value = clampedX;
         document.getElementById('pointForm:y').value = clampedY;
@@ -201,25 +203,41 @@ class PointChecker {
     }
 }
     restoreSelection() {
-    try {
-            const savedR = localStorage.getItem('selectedR') || '3';
-            const radio = document.querySelector(`.r-radio[value="${savedR}"]`)
-                       || document.querySelector('.r-radio[value="3"]');
+         try {
+             const savedX = localStorage.getItem('selectedX');
+             let savedR = localStorage.getItem('selectedR');
 
-            if (radio) {
-                radio.checked = true;
-                document.getElementById('pointForm:r').value = savedR;
-                drawGraph(parseFloat(savedR));
-            }
-        } catch (e) {
-        console.error('Error restoring selection:', e);
-        const defaultRadio = document.querySelector('.r-radio[value="3"]');
-        if (defaultRadio) {
-            defaultRadio.checked = true;
-            drawGraph(3);
-        }
-    }
-}
+             if (savedX) this.selectXValue(savedX);
+
+             let rToUse = 3;
+             if (savedR) {
+                 const parsed = parseFloat(savedR);
+                 if (!isNaN(parsed) && parsed >= 1 && parsed <= 5) {
+                     rToUse = parsed;
+                 } else {
+                     console.warn("Невалидный savedR из localStorage:", savedR);
+                 }
+             }
+
+             const radioSelector = `.r-radio[value="${rToUse}"]`;
+             const radio = document.querySelector(radioSelector) || document.querySelector('.r-radio[value="3"]');
+
+             if (radio) {
+                 radio.checked = true;
+                 document.getElementById('pointForm:r').value = rToUse;
+                 drawGraph(rToUse);
+             }
+         } catch (e) {
+             console.error("Ошибка в restoreSelection", e);
+             // дефолт
+             const def = document.querySelector('.r-radio[value="3"]');
+             if (def) {
+                 def.checked = true;
+                 document.getElementById('pointForm:r').value = '3';
+                 drawGraph(3);
+             }
+         }
+     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -229,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.pointChecker = new PointChecker();
 
 function drawSavedPoints(r) {
+console.log("drawSavedPoints вызван с r =", r);
     // Самый надёжный селектор: все <tr> внутри контейнера результатов
     const tableContainer = document.getElementById('resultsPanel') ||
                           document.getElementById('results') ||
@@ -273,21 +292,31 @@ function drawSavedPoints(r) {
             }
         }
     });
+    console.log("Нарисовано точек:", /* количество нарисованных */);
 }
 
 function drawGraph(r = 3) {
-    console.log("drawGraph вызван, r =", r);
+    console.log("drawGraph вызван с r =", r, "caller:", new Error().stack.split("\n")[2].trim());
+    // Защита от NaN, undefined, некорректных значений
+    if (typeof r !== 'number' || isNaN(r) || r <= 0) {
+        console.warn("Некорректный r → используем 3 по умолчанию");
+        r = 3;
+    }
 
     const canvas = document.getElementById('areaGraph');
-    if (!canvas) return;
+    if (!canvas) {
+        console.warn("Canvas не найден");
+        return;
+    }
+
     const ctx = canvas.getContext('2d');
-    const size = 300;
+    const size = canvas.width;   // 300
     const center = size / 2;
-    const scale = size / 10;  // 30 px = 1 единица
+    const scale = size / 10;     // 30 px = 1 единица
 
     ctx.clearRect(0, 0, size, size);
 
-    // Оси + стрелки (это рисуется всегда)
+    // Оси
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -295,55 +324,49 @@ function drawGraph(r = 3) {
     ctx.moveTo(0, center); ctx.lineTo(size, center);
     ctx.stroke();
 
-    // Стрелки
+    // Стрелки (немного крупнее для видимости)
     ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.moveTo(center, 0); ctx.lineTo(center-6,12); ctx.lineTo(center+6,12); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(size, center); ctx.lineTo(size-12,center-6); ctx.lineTo(size-12,center+6); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(center, 0); ctx.lineTo(center-7,14); ctx.lineTo(center+7,14); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(size, center); ctx.lineTo(size-14,center-7); ctx.lineTo(size-14,center+7); ctx.fill();
 
-    // === Область (с защитой от отрицательных/больших координат) ===
-    ctx.fillStyle = 'rgba(0, 180, 255, 0.25)';
-    ctx.strokeStyle = '#0066cc';
-    ctx.lineWidth = 2;
+    // Область
+    ctx.fillStyle = 'rgba(30, 144, 255, 0.28)';
+    ctx.strokeStyle = '#1e90ff';
+    ctx.lineWidth = 1.8;
 
-    const halfR = r / 2;
-    const rScale = r * scale;
-    const halfRScale = halfR * scale;
+    const half = r / 2;
+    const rPx = r * scale;
+    const halfPx = half * scale;
 
-    // Прямоугольник (второй квадрант)
-    let rectLeft = center - rScale;
-    let rectTop  = center - halfRScale;
-    let rectW = rScale;
-    let rectH = halfRScale;
-
-    // Защита: если rectLeft < 0 — сдвигаем, но лучше клиппинг
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, 0, size, size);  // клиппинг к canvas
+    ctx.rect(0, 0, size, size);
     ctx.clip();
 
-    ctx.fillRect(rectLeft, rectTop, rectW, rectH);
-    ctx.strokeRect(rectLeft, rectTop, rectW, rectH);
+    // 1. Прямоугольник (второй квадрант)
+    ctx.fillRect(center - rPx, center - halfPx, rPx, halfPx);
+    ctx.strokeRect(center - rPx, center - halfPx, rPx, halfPx);
 
-    // Четверть круга (третий квадрант)
+    // 2. Четверть круга (третий квадрант)
     ctx.beginPath();
-    ctx.arc(center, center, halfRScale, Math.PI, 1.5 * Math.PI, false);
+    ctx.arc(center, center, halfPx, Math.PI, 1.5 * Math.PI, false);
     ctx.lineTo(center, center);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Треугольник (четвёртый квадрант)
+    // 3. Треугольник (четвёртый квадрант)
     ctx.beginPath();
     ctx.moveTo(center, center);
-    ctx.lineTo(center, center + halfRScale);
-    ctx.lineTo(center + halfRScale, center);
+    ctx.lineTo(center, center + halfPx);
+    ctx.lineTo(center + halfPx, center);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     ctx.restore();
 
-    // Метки (всегда рисуем)
+    // Метки
     ctx.fillStyle = '#000';
     ctx.font = '11px Arial';
     ctx.textAlign = 'center';
@@ -352,16 +375,16 @@ function drawGraph(r = 3) {
         const px = center + i * scale;
         const py = center - i * scale;
         ctx.beginPath(); ctx.moveTo(px, center-4); ctx.lineTo(px, center+4); ctx.stroke();
-        ctx.fillText(i, px, center + 18);
+        ctx.fillText(i, px, center + 20);
         ctx.beginPath(); ctx.moveTo(center-4, py); ctx.lineTo(center+4, py); ctx.stroke();
-        ctx.fillText(i, center - 20, py + 4);
+        ctx.fillText(i, center - 22, py + 5);
     }
-    ctx.fillText('X', size - 15, center - 10);
-    ctx.fillText('Y', center + 18, 18);
+    ctx.fillText('X', size - 18, center - 12);
+    ctx.fillText('Y', center + 20, 22);
 
     drawSavedPoints(r);
 
-    console.log("drawGraph завершён");
+    console.log("drawGraph завершён, r =", r);
 }
 
 function showError(message) {
@@ -391,23 +414,76 @@ function handleAfterClear() {
     localStorage.removeItem('selectedR');
 }
 
-// В updateR() обязательно обновляем hidden поле и снимаем другие галочки
-function updateR(checkbox, value) {
-    // Всегда снимаем с остальных
-    document.querySelectorAll('input.r-radio[type="checkbox"]').forEach(cb => {
-        if (cb !== checkbox) cb.checked = false;
-    });
+function updateR(checkbox, intendedR) {
+     // intendedR приходит из onclick как число (1.0, 1.5, 2.0, 2.5, 3.0)
 
-    if (checkbox.checked) {
-        document.getElementById('pointForm:r').value = value;
-        drawGraph(parseFloat(value));
-    } else {
-        // Если сняли — возвращаем дефолт
-        const def = document.querySelector('.r-radio[value="3"]');
-        if (def) {
-            def.checked = true;
-            document.getElementById('pointForm:r').value = '3';
-            drawGraph(3);
-        }
-    }
-}
+     // Приводим к числу сразу
+     const rValue = parseFloat(intendedR);
+     if (isNaN(rValue)) {
+         console.warn("updateR получил некорректный intendedR:", intendedR);
+         return;  // ← не рисуем вообще, если пришло что-то невалидное
+     }
+
+     // Снимаем галочки с остальных
+     document.querySelectorAll('input.r-radio[type="checkbox"]').forEach(cb => {
+         if (cb !== checkbox) cb.checked = false;
+     });
+
+     if (checkbox.checked) {
+         // Устанавливаем значение
+         document.getElementById('pointForm:r').value = rValue;
+         localStorage.setItem('selectedR', rValue);
+
+         // Рисуем с новым радиусом
+         drawGraph(rValue);
+     } else {
+         // Возвращаем дефолт 3
+         const defCheckbox = document.querySelector('input.r-radio[value="3"]');
+         if (defCheckbox) {
+             defCheckbox.checked = true;
+             document.getElementById('pointForm:r').value = '3';
+             localStorage.setItem('selectedR', '3');
+             drawGraph(3);
+         }
+     }
+ }
+
+ function redrawCurrentGraph() {
+     const currentRInput = document.getElementById('pointForm:r');
+     const r = currentRInput && currentRInput.value ? parseFloat(currentRInput.value) : 3;
+     if (!isNaN(r)) {
+         drawGraph(r);
+     }
+ }
+
+ function adjustSliderValue() {
+     // Берём значение из hidden-поля (оно обновляется PrimeFaces при движении слайдера)
+     const hiddenInput = document.getElementById('pointForm:hiddenX');
+     if (!hiddenInput) {
+         console.warn("hiddenX не найден");
+         return;
+     }
+
+     let rawValue = parseFloat(hiddenInput.value);
+
+     // Если значение выглядит как процент (0–100), пересчитываем в реальный диапазон
+     if (!isNaN(rawValue) && rawValue >= 0 && rawValue <= 100) {
+         const min = -5;
+         const max = 5;
+         rawValue = min + (rawValue / 100) * (max - min);
+     }
+
+     // Округляем до 1 знака после запятой
+     const correctedValue = isNaN(rawValue) ? 0 : Math.round(rawValue * 10) / 10;
+
+     // Записываем обратно в hidden (на всякий случай)
+     hiddenInput.value = correctedValue;
+
+     // Обновляем отображаемый текст
+     const display = document.getElementById('pointForm:xDisplay');
+     if (display) {
+         display.innerText = correctedValue.toFixed(1);
+     }
+
+     console.log("Слайдер скорректирован →", correctedValue);
+ }
