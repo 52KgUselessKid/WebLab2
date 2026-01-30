@@ -3,7 +3,6 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:ace="http://www.icefaces.org/icefaces/components"
       lang="ru">
 <h:head>
     <meta charset="UTF-8"/>
@@ -27,18 +26,21 @@
 
                 <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 16px;">
 
-                    <!-- X: ace:sliderEntry от -5 до 5, шаг 1 -->
                     <div style="width: 100%; max-width: 400px;">
                         <label>X: </label>
-                        <ace:sliderEntry id="xSlider"
-                                         min=" -5"
-                                         max="5"
-                                         step="1"
-                                         value="#{pointBean.x}"
-                                         displayValue="true"
-                                         displayValuePosition="right"
-                                         style="width: 100%;"/>
-                        <h:inputHidden id="x" value="#{pointBean.x}"/>
+
+                        <!-- Hidden первый — важно порядок -->
+                        <h:inputHidden id="hiddenX" value="#{pointBean.x}"/>
+
+                        <p:slider id="xSlider"
+                                  for="hiddenX"
+                                  min="-5"
+                                  max="5"
+                                  step="1"
+                                  value="#{pointBean.x}"
+                                  displayValue="true"
+                                  displayValueTemplate="{value}"
+                                  style="width: 100%;"/>
                     </div>
 
                     <!-- Y: p:inputText с валидацией -->

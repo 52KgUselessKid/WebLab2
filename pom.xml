@@ -47,6 +47,7 @@
 
     <build>
         <finalName>area-check</finalName>
+        <directory>/home/dan/Programs/wildfly-38.0.1.Final/standalone/deployments</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

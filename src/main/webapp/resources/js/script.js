@@ -114,22 +114,22 @@ class PointChecker {
 
     const selectedRadio = document.querySelector('.r-radio:checked');
     if (!selectedRadio) {
-        this.showError('Выберите значение R');
+        showError('Выберите значение R');
         return false;
     }
     const rValue = selectedRadio.value;
     if (!xInput.value) {
-        this.showError('Выберите значение X');
+        showError('Выберите значение X');
         return false;
     }
     if (!yInput.value) {
-        this.showError('Введите значение Y');
+        showError('Введите значение Y');
         return false;
     }
     const yValid = this.validateY(yInput.value);
     const rValid = this.validateR(rValue);
     if (!yValid || !rValid) {
-        this.showError('Исправьте ошибки в форме');
+        showError('Исправьте ошибки в форме');
         return false;
     }
     return true;
@@ -146,13 +146,13 @@ class PointChecker {
 
         const selectedRadio = document.querySelector('.r-radio:checked');
         if (!selectedRadio) {
-            this.showError('Сначала выберите значение R');
+            showError('Сначала выберите значение R');
             return;
         }
 
         const rValue = this.parseNumber(selectedRadio.value);
         if (isNaN(rValue) || !rValue) {
-            this.showError('Сначала выберите значение R');
+            showError('Сначала выберите значение R');
             return;
         }
 
