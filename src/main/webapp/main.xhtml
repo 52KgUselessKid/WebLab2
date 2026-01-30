@@ -24,7 +24,7 @@
         <div class="input-section">
             <h:form id="pointForm">
 
-                <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+                <div class="form-row" style="flex-direction: column; align-items: center; gap: 16px;">
 
                     <div style="width: 100%; max-width: 400px;">
                         <label>X: </label>
@@ -55,37 +55,37 @@
                         <p:message for="y" display="text"/>
                     </div>
 
-                    <!-- R: selectBooleanCheckbox (группа, только один может быть выбран) -->
+                    <!-- Блок R -->
                     <div>
                         <label>R: </label>
-                        <div style="display: flex; gap: 24px; margin-top: 8px;">
+                        <div style="display: flex; gap: 24px; margin-top: 8px; justify-content: center;">
                             <div>
-                                <h:selectBooleanCheckbox id="r1"
-                                                         value="#{pointBean.r == 1.0}"
+                                <h:selectBooleanCheckbox id="r1" class="r-radio"
+                                                         value="#{pointBean.r1Selected}"
                                                          onclick="updateR(this, 1.0)"/>
                                 <label for="r1">1</label>
                             </div>
                             <div>
-                                <h:selectBooleanCheckbox id="r15"
-                                                         value="#{pointBean.r == 1.5}"
+                                <h:selectBooleanCheckbox id="r15" class="r-radio"
+                                                         value="#{pointBean.r15Selected}"
                                                          onclick="updateR(this, 1.5)"/>
                                 <label for="r15">1.5</label>
                             </div>
                             <div>
-                                <h:selectBooleanCheckbox id="r2"
-                                                         value="#{pointBean.r == 2.0}"
+                                <h:selectBooleanCheckbox id="r2" class="r-radio"
+                                                         value="#{pointBean.r2Selected}"
                                                          onclick="updateR(this, 2.0)"/>
                                 <label for="r2">2</label>
                             </div>
                             <div>
-                                <h:selectBooleanCheckbox id="r25"
-                                                         value="#{pointBean.r == 2.5}"
+                                <h:selectBooleanCheckbox id="r25" class="r-radio"
+                                                         value="#{pointBean.r25Selected}"
                                                          onclick="updateR(this, 2.5)"/>
                                 <label for="r25">2.5</label>
                             </div>
                             <div>
-                                <h:selectBooleanCheckbox id="r3"
-                                                         value="#{pointBean.r == 3.0}"
+                                <h:selectBooleanCheckbox id="r3" class="r-radio"
+                                                         value="#{pointBean.r3Selected}"
                                                          onclick="updateR(this, 3.0)"/>
                                 <label for="r3">3</label>
                             </div>
@@ -95,12 +95,12 @@
 
                     <!-- Кнопки -->
                     <div style="margin-top: 16px; display: flex; gap: 16px;">
-                        <p:commandButton value="Проверить"
+                        <p:commandButton id="submitBtn" value="Проверить"
                                          action="#{pointBean.check}"
                                          update="resultsPanel messages"
                                          process="@form"/>
 
-                        <p:commandButton value="Очистить"
+                        <p:commandButton id="clearBtn" value="Очистить"
                                          action="#{pointBean.clear}"
                                          update="resultsPanel messages"
                                          process="@form"
@@ -126,7 +126,7 @@
                 <h3 style="text-align: center;">Результаты</h3>
 
                 <h:panelGroup id="resultsPanel" layout="block">
-                    <h:dataTable id="resultsTable"
+                    <h:dataTable id="resultsTable" class="results-table"
                                  value="#{resultsBean.results}"
                                  var="rec"
                                  style="width:100%; border-collapse: collapse; margin: 0 auto;">
