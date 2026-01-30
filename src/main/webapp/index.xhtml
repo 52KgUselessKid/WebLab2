@@ -1,40 +1,38 @@
-<!-- index.xhtml -->
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui">
-
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      lang="ru">
 <h:head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Лабораторная работа №2</title>
     <h:outputStylesheet library="css" name="style.css"/>
 </h:head>
-
 <h:body>
-
     <div class="container">
-
         <header id="main-header">
             <h1>Лабораторная работа №2</h1>
             <div class="student-info">
-                <span>Кабиров Данияр Умарович</span>
-                <span>Группа: P3223</span>
-                <span>Вариант: 2555</span>
+                <span class="fio">Кабиров Данияр Умарович</span>
+                <span class="group">Группа: P3223</span>
+                <span class="variant">Вариант: 2555</span>
             </div>
         </header>
 
-        <div style="margin-top: 20px; font-size: 18px;">
-            <p:poll interval="13" update="clock"/>
-            <h:outputText id="clock" value="#{clockBean.currentTime}"/>
-        </div>
+        <h:form id="clockForm">
+            <div>
+                Текущее время:
+                <h:outputText id="time" value="#{clockBean.currentTime}"/>
+                <p:poll interval="13" update="time"/>
+            </div>
+        </h:form>
 
-        <div style="margin-top: 30px;">
-            <h:link value="Перейти к приложению"
-                    outcome="/app.xhtml"
-                    style="font-size: 18px; color: #0099ff;"/>
-        </div>
-
+        <br/>
+        <!-- Самый надёжный способ — обычная ссылка, не commandLink -->
+        <h:outputLink value="#{request.contextPath}/main.xhtml">
+            Перейти к основной странице приложения
+        </h:outputLink>
     </div>
-
 </h:body>
 </html>

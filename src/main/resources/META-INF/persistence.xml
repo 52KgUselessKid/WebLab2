@@ -1,35 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+<persistence version="3.0"
+             xmlns="https://jakarta.ee/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
-             https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
-             version="3.0">
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
 
-    <persistence-unit name="areacheckPU" transaction-type="JTA">
+    <persistence-unit name="pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-
-        <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
-        <class>com.example.areacheck.entities.ResultEntity</class>
-
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <class>com.example.areacheck.ResultRecord</class>
 
         <properties>
-            <!-- УДАЛИТЕ или ЗАКОММЕНТИРУЙTE эту строку -->
-            <!-- <property name="eclipselink.target-database" value="H2"/> -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.hsqldb.jdbc.JDBCDriver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:hsqldb:file:target/db/results;shutdown=true"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
 
-            <!-- Используйте полное имя класса если нужно -->
-            <property name="eclipselink.target-database"
-                      value="org.eclipse.persistence.platform.database.H2Platform"/>
+            <property name="eclipselink.target-database" value="org.eclipse.persistence.platform.database.HSQLPlatform"/>
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.logging.level" value="OFF"/>
 
-            <property name="eclipselink.logging.level" value="FINE"/>
-            <property name="eclipselink.logging.parameters" value="true"/>
-
-            <!-- Создание таблиц -->
-            <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
-
-            <!-- Отключаем валидацию для тестирования -->
-            <property name="jakarta.persistence.validation.mode" value="NONE"/>
+            <!-- Отключаем JSON-платформы, чтобы не было OracleJsonPlatform ошибки -->
+            <property name="eclipselink.json.platform" value="org.eclipse.persistence.platform.database.json.DefaultJsonPlatform"/>
         </properties>
     </persistence-unit>
-
 </persistence>

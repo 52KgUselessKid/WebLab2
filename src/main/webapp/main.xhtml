@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ace="http://www.icefaces.org/icefaces/components"
+      lang="ru">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Лабораторная работа №2</title>
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+<h:body>
+    <div class="container">
+        <header id="main-header">
+            <h1>Лабораторная работа №2</h1>
+            <div class="student-info">
+                <span class="fio">Кабиров Данияр Умарович</span>
+                <span class="group">Группа: P3223</span>
+                <span class="variant">Вариант: 2555</span>
+            </div>
+        </header>
+
+        <div class="input-section">
+            <h:form id="pointForm">
+
+                <div class="form-row" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+
+                    <!-- X: ace:sliderEntry от -5 до 5, шаг 1 -->
+                    <div style="width: 100%; max-width: 400px;">
+                        <label>X: </label>
+                        <ace:sliderEntry id="xSlider"
+                                         min=" -5"
+                                         max="5"
+                                         step="1"
+                                         value="#{pointBean.x}"
+                                         displayValue="true"
+                                         displayValuePosition="right"
+                                         style="width: 100%;"/>
+                        <h:inputHidden id="x" value="#{pointBean.x}"/>
+                    </div>
+
+                    <!-- Y: p:inputText с валидацией -->
+                    <div>
+                        <label for="y">Y: </label>
+                        <p:inputText id="y"
+                                     value="#{pointBean.y}"
+                                     required="true"
+                                     validatorMessage="Y должно быть числом от -5 до 5">
+                            <f:validateDoubleRange minimum="-5" maximum="5"/>
+                        </p:inputText>
+                        <p:message for="y" display="text"/>
+                    </div>
+
+                    <!-- R: selectBooleanCheckbox (группа, только один может быть выбран) -->
+                    <div>
+                        <label>R: </label>
+                        <div style="display: flex; gap: 24px; margin-top: 8px;">
+                            <div>
+                                <h:selectBooleanCheckbox id="r1"
+                                                         value="#{pointBean.r == 1.0}"
+                                                         onclick="updateR(this, 1.0)"/>
+                                <label for="r1">1</label>
+                            </div>
+                            <div>
+                                <h:selectBooleanCheckbox id="r15"
+                                                         value="#{pointBean.r == 1.5}"
+                                                         onclick="updateR(this, 1.5)"/>
+                                <label for="r15">1.5</label>
+                            </div>
+                            <div>
+                                <h:selectBooleanCheckbox id="r2"
+                                                         value="#{pointBean.r == 2.0}"
+                                                         onclick="updateR(this, 2.0)"/>
+                                <label for="r2">2</label>
+                            </div>
+                            <div>
+                                <h:selectBooleanCheckbox id="r25"
+                                                         value="#{pointBean.r == 2.5}"
+                                                         onclick="updateR(this, 2.5)"/>
+                                <label for="r25">2.5</label>
+                            </div>
+                            <div>
+                                <h:selectBooleanCheckbox id="r3"
+                                                         value="#{pointBean.r == 3.0}"
+                                                         onclick="updateR(this, 3.0)"/>
+                                <label for="r3">3</label>
+                            </div>
+                        </div>
+                        <h:inputHidden id="r" value="#{pointBean.r}"/>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div style="margin-top: 16px; display: flex; gap: 16px;">
+                        <p:commandButton value="Проверить"
+                                         action="#{pointBean.check}"
+                                         update="resultsPanel messages"
+                                         process="@form"/>
+
+                        <p:commandButton value="Очистить"
+                                         action="#{pointBean.clear}"
+                                         update="resultsPanel messages"
+                                         process="@form"
+                                         onclick="return confirm('Очистить все результаты?');"/>
+                    </div>
+
+                    <p:messages id="messages" showDetail="true" closable="true"/>
+                </div>
+            </h:form>
+
+            <div id="error-banner"></div>
+        </div>
+
+        <!-- График -->
+        <div class="graph-container">
+            <canvas id="areaGraph" width="300" height="300"></canvas>
+            <div id="canvasPoint"></div>
+        </div>
+
+        <!-- Таблица результатов – центрирована -->
+        <div style="margin-top: 30px; display: flex; justify-content: center;">
+            <div style="width: 100%; max-width: 900px;">
+                <h3 style="text-align: center;">Результаты</h3>
+
+                <h:panelGroup id="resultsPanel" layout="block">
+                    <h:dataTable id="resultsTable"
+                                 value="#{resultsBean.results}"
+                                 var="rec"
+                                 style="width:100%; border-collapse: collapse; margin: 0 auto;">
+                        <h:column>
+                            <f:facet name="header">X</f:facet>
+                            #{rec.x}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Y</f:facet>
+                            #{rec.y}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">R</f:facet>
+                            #{rec.r}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Результат</f:facet>
+                            <h:outputText value="#{rec.hit ? 'Попадание' : 'Промах'}"
+                                          styleClass="#{rec.hit ? 'hit' : 'miss'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Время</f:facet>
+                            #{rec.formattedTime}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Время работы скрипта</f:facet>
+                            #{rec.formattedExec}
+                        </h:column>
+                    </h:dataTable>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <br/>
+        <div style="text-align: center;">
+            <h:outputLink value="#{request.contextPath}/index.xhtml">
+                Вернуться к стартовой странице
+            </h:outputLink>
+        </div>
+    </div>
+
+    <h:outputScript library="js" name="script.js"/>
+</h:body>
+</html>
