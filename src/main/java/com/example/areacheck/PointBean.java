@@ -20,13 +20,6 @@ public class PointBean implements Serializable {
     private double y = 0.0;
     private double r = 3.0;
 
-    // ── новые поля для чекбоксов R ────────────────────────────────
-    private boolean rSelected1  = false;
-    private boolean rSelected15 = false;
-    private boolean rSelected2  = false;
-    private boolean rSelected25 = false;
-    private boolean rSelected3  = true;   // по умолчанию выбрано 3
-
     // Геттеры и сеттеры для X, Y, R (старые — оставляем)
     public double getX() { return x; }
     public void setX(double incomingPercent) {
