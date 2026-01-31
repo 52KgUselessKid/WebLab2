@@ -219,13 +219,13 @@ class PointChecker {
         if (hiddenR) hiddenR.value = rValue;
 
         // Показываем временную точку (позиционируем относительно окна)
-        const point = document.getElementById('canvasPoint');
-        if (point) {
-            // позиционируем относительно viewport (как у вас было)
-            point.style.left = `${clickX + rect.left}px`;
-            point.style.top = `${clickY + rect.top}px`;
-            point.style.display = 'block';
-        }
+//        const point = document.getElementById('canvasPoint');
+//        if (point) {
+//            // позиционируем относительно viewport (как у вас было)
+//            point.style.left = `${clickX + rect.left}px`;
+//            point.style.top = `${clickY + rect.top}px`;
+//            point.style.display = 'block';
+//        }
 
         // Обновляем отображение X рядом со слайдером (в реальных единицах)
         const display = document.getElementById('pointForm:xDisplay');
