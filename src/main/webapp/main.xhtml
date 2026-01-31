@@ -28,21 +28,29 @@
 
                     <div style="width: 100%; max-width: 400px; margin: 0 auto 20px auto;">
                         <div style="text-align: center; margin-bottom: 8px;">
-                            <label>X: </label>
+
+                                <label for="xInput">X: </label>
+                                <p:inputText id="xInput"
+                                             value="#{pointBean.x}"
+                                             oninput="updateXFromInput()"
+                                             style="width:80px; text-align:center;"/>
+
+
                             <h:outputText id="xDisplay" value="#{pointBean.x}" style="font-weight: bold; font-size: 1.2em; color: #007bff;"/>
                         </div>
 
                         <h:inputHidden id="hiddenX" value="#{pointBean.x}"/>
 
                         <p:slider id="xSlider"
+                                  widgetVar="xSliderWidget"
                                   for="hiddenX"
                                   min="0"
-                                  max="200"
-                        step="1"
-                        value="#{pointBean.sliderPercent}"
-                        displayValue="false"
-                        onSlide="adjustSliderValue()"
-                        style="width: 100%;"/>
+                                  max="100"
+                                  step="1"
+                                  onSlide="adjustSliderValue()"
+                                  displayValue="false"
+                                  style="width: 100%;"/>
+
                     </div>
 
                     <!-- Y: p:inputText с валидацией -->

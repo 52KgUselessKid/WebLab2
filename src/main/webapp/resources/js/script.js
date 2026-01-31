@@ -511,20 +511,43 @@ function updateR(checkbox, intendedR) {
  }
 
  function adjustSliderValue() {
-     const hiddenInput = document.getElementById('pointForm:hiddenX');
-     if (!hiddenInput) return;
-
-     let rawPercent = parseFloat(hiddenInput.value);
-     if (isNaN(rawPercent)) rawPercent = 50; // дефолт
-
-     const min = -5;
-     const max = 5;
-     const realValue = min + (rawPercent / 100) * (max - min);
-     const correctedValue = Math.round(realValue * 100) / 100;
-
-     // Записываем обратно в hidden как процент (на случай, если мы пересчитали)
-     hiddenInput.value = Math.round(((correctedValue - min) / (max - min)) * 100);
-
-     const display = document.getElementById('pointForm:xDisplay');
-     if (display) display.innerText = correctedValue.toFixed(2);
+     updateXFromSlider();
  }
+
+
+function updateXFromInput() {
+    const input = document.getElementById('pointForm:xInput');
+    const hidden = document.getElementById('pointForm:hiddenX');
+    const slider = PF('xSliderWidget');
+
+    let val = parseFloat(input.value.replace(',', '.'));
+    if (isNaN(val)) return;
+
+    // clamp
+    val = Math.max(-5, Math.min(5, val));
+
+    // перевод в процент
+    const percent = Math.round(((val + 5) / 10) * 100);
+
+    hidden.value = percent;
+
+    if (slider) slider.setValue(percent);
+
+    const display = document.getElementById('pointForm:xDisplay');
+    if (display) display.innerText = val.toFixed(2);
+}
+
+function updateXFromSlider() {
+    const hidden = document.getElementById('pointForm:hiddenX');
+    const input = document.getElementById('pointForm:xInput');
+
+    let percent = parseFloat(hidden.value);
+    if (isNaN(percent)) percent = 50;
+
+    const real = -5 + (percent / 100) * 10;
+    const rounded = Math.round(real * 100) / 100;
+
+    input.value = rounded;
+    const display = document.getElementById('pointForm:xDisplay');
+    if (display) display.innerText = rounded.toFixed(2);
+}

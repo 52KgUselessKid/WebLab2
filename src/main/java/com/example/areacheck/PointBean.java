@@ -30,12 +30,8 @@ public class PointBean implements Serializable {
     // Геттеры и сеттеры для X, Y, R (старые — оставляем)
     public double getX() { return x; }
     public void setX(double incomingPercent) {
-        // incomingPercent — это значение со слайдера, обычно 0..100
         double percent = Math.max(0.0, Math.min(100.0, incomingPercent));
-
         double rawX = -5.0 + (percent / 100.0) * 10.0;
-
-        // Главное — принудительное округление до 2 знаков
         this.x = Math.round(rawX * 100.0) / 100.0;
     }
 
@@ -180,8 +176,8 @@ public class PointBean implements Serializable {
     }
 
     public void setSliderPercent(int percent) {
-        this.sliderPercent = percent;
-        double raw = -5.0 + (percent / 200.0) * 10.0;
-        this.x = Math.round(raw * 100.0) / 100.0;  // → -1.40, -1.35, -1.30 ...
+        this.sliderPercent = Math.max(0, Math.min(100, percent));
+        double raw = -5.0 + (sliderPercent / 100.0) * 10.0;
+        this.x = Math.round(raw * 100.0) / 100.0;
     }
 }
