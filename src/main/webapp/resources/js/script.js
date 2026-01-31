@@ -66,12 +66,7 @@ class PointChecker {
         const hidden = document.getElementById('pointForm:hiddenX');
         if (hidden) hidden.value = percent;
 
-        // Обновляем отображение
-        const display = document.getElementById('pointForm:xDisplay');
-        if (display) {
-            const real = -5 + (percent / 100) * 10;
-            display.innerText = real.toFixed(2);
-        }
+
 
         this.saveSelection();
     }
@@ -227,12 +222,7 @@ class PointChecker {
 //            point.style.display = 'block';
 //        }
 
-        // Обновляем отображение X рядом со слайдером (в реальных единицах)
-        const display = document.getElementById('pointForm:xDisplay');
-        if (display) {
-            const realForDisplay = min + (percentX / 100) * (max - min);
-            display.innerText = realForDisplay.toFixed(2);
-        }
+
 
         // Надёжный поиск кнопки отправки: ищем элемент, id которого оканчивается на submitBtn
         // (это работает независимо от префикса clientId)
@@ -533,8 +523,7 @@ function updateXFromInput() {
 
     if (slider) slider.setValue(percent);
 
-    const display = document.getElementById('pointForm:xDisplay');
-    if (display) display.innerText = val.toFixed(2);
+
 }
 
 function updateXFromSlider() {
@@ -548,6 +537,5 @@ function updateXFromSlider() {
     const rounded = Math.round(real * 100) / 100;
 
     input.value = rounded;
-    const display = document.getElementById('pointForm:xDisplay');
-    if (display) display.innerText = rounded.toFixed(2);
+
 }
