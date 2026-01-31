@@ -7,6 +7,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Named("pointBean")
@@ -16,20 +18,40 @@ public class PointBean implements Serializable {
     @Inject
     private ResultsBean resultsBean;
 
-    private double x = 0.0;
-    private double y = 0.0;
+    private BigDecimal x = BigDecimal.ZERO;
+    private BigDecimal y = BigDecimal.ZERO;
     private double r = 3.0;
 
-    // Геттеры и сеттеры для X, Y, R (старые — оставляем)
-    public double getX() { return x; }
-    public void setX(double incomingPercent) {
-        double percent = Math.max(0.0, Math.min(100.0, incomingPercent));
-        double rawX = -5.0 + (percent / 100.0) * 10.0;
-        this.x = Math.round(rawX * 100.0) / 100.0;
+    public BigDecimal getX() {
+        return x;
     }
 
-    public double getY() { return y; }
-    public void setY(double y) { this.y = y; }
+    // incomingPercent приходит из hiddenX (0..100)
+    public void setX(BigDecimal incomingPercent) {
+        if (incomingPercent == null) return;
+
+        BigDecimal percent = incomingPercent
+                .max(BigDecimal.ZERO)
+                .min(BigDecimal.valueOf(100));
+
+        // rawX = -5 + percent/100 * 10
+        BigDecimal rawX = BigDecimal.valueOf(-5)
+                .add(percent
+                        .divide(BigDecimal.valueOf(100), 20, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.TEN));
+
+        this.x = rawX;   // ❗ НИ ОДНОГО округления
+    }
+
+
+    public BigDecimal getY() {
+        return y;
+    }
+
+    public void setY(BigDecimal y) {
+        this.y = y;
+    }
+
 
     public double getR() { return r; }
     public void setR(double r) { this.r = r; }
@@ -107,11 +129,20 @@ public class PointBean implements Serializable {
 //            }
 
             long start = System.nanoTime();
-            hit = isHit(x, y, r);
+            hit = isHit(x, y, BigDecimal.valueOf(r));
+
             long execTime = System.nanoTime() - start;
 
             LocalDateTime now = LocalDateTime.now();
-            ResultRecord record = new ResultRecord(x, y, r, hit, now, execTime);
+            ResultRecord record = new ResultRecord(
+                    x,          // ← BigDecimal, без округлений
+                    y,
+                    r,
+                    hit,
+                    now,
+                    execTime
+            );
+
             resultsBean.add(record);
 
             // Для отладки — выведи в консоль сервера, что реально пришло
@@ -128,39 +159,51 @@ public class PointBean implements Serializable {
 
     public void clear() {
         resultsBean.clear();
-        x = 0;
-        y = 0;
-        syncR(3.0);   // ← важно — сбрасываем и чекбоксы, и r
+        x = BigDecimal.ZERO;
+        y = BigDecimal.ZERO;
+        syncR(3.0);
     }
 
-    private boolean isHit(double x, double y, double r) {
-        // 1. Правый верхний квадрант → треугольник
-        if (x >= 0 && y >= 0) {
-            return x <= r / 2.0 && y <= r - 2.0 * x;
-            // или более безопасно:
-            // return x <= r / 2.0 && y <= r * (1 - 2.0 * x / r);
+
+    private boolean isHit(BigDecimal x, BigDecimal y, BigDecimal r) {
+
+        // x >= 0 && y >= 0
+        if (x.compareTo(BigDecimal.ZERO) >= 0 &&
+                y.compareTo(BigDecimal.ZERO) >= 0) {
+
+            return x.compareTo(r.divide(BigDecimal.valueOf(2), 20, RoundingMode.HALF_UP)) <= 0
+                    && y.compareTo(
+                    r.subtract(x.multiply(BigDecimal.valueOf(2)))
+            ) <= 0;
         }
 
-        // 2. Квадрант x ≤ 0, y ≥ 0 → прямоугольник -R ≤ x ≤ 0, 0 ≤ y ≤ R
-        if (x <= 0 && y >= 0) {
-            if (x >= -r && y <= r) {
-                return true;
-            }
+        // x <= 0 && y >= 0
+        if (x.compareTo(BigDecimal.ZERO) <= 0 &&
+                y.compareTo(BigDecimal.ZERO) >= 0) {
+
+            return x.compareTo(r.negate()) >= 0 &&
+                    y.compareTo(r) <= 0;
+        }
+
+        // x < 0 && y < 0
+        if (x.compareTo(BigDecimal.ZERO) < 0 &&
+                y.compareTo(BigDecimal.ZERO) < 0) {
             return false;
         }
 
-        // 3. Квадрант x < 0, y < 0 → пустой
-        if (x < 0 && y < 0) {
-            return false;
-        }
+        // четверть круга
+        if (x.compareTo(BigDecimal.ZERO) >= 0 &&
+                y.compareTo(BigDecimal.ZERO) <= 0) {
 
-        // 4. Квадрант x ≥ 0, y ≤ 0 → четверть круга радиусом R
-        if (x >= 0 && y <= 0) {
-            return (x * x + y * y) <= (r * r);
+            BigDecimal left = x.pow(2).add(y.pow(2));
+            BigDecimal right = r.pow(2);
+
+            return left.compareTo(right) <= 0;
         }
 
         return false;
     }
+
 
     private int sliderPercent = 100;  // центр = 0.0
 
@@ -170,7 +213,15 @@ public class PointBean implements Serializable {
 
     public void setSliderPercent(int percent) {
         this.sliderPercent = Math.max(0, Math.min(100, percent));
-        double raw = -5.0 + (sliderPercent / 100.0) * 10.0;
-        this.x = Math.round(raw * 100.0) / 100.0;
+
+        BigDecimal rawX = BigDecimal.valueOf(-5)
+                .add(
+                        BigDecimal.valueOf(sliderPercent)
+                                .divide(BigDecimal.valueOf(100), 20, RoundingMode.HALF_UP)
+                                .multiply(BigDecimal.TEN)
+                );
+
+        // ⚠️ ВАЖНО: тут МОЖНО округлять, потому что это СЛАЙДЕР
+        this.x = rawX.setScale(2, RoundingMode.HALF_UP);
     }
 }

@@ -2,6 +2,7 @@ package com.example.areacheck;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,8 +13,11 @@ public class ResultRecord implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double x;
-    private double y;
+    @Column(precision = 40, scale = 20)
+    private BigDecimal x;
+
+    @Column(precision = 40, scale = 20)
+    private BigDecimal y;
     private double r;
     private boolean hit;
     private LocalDateTime time;
@@ -22,7 +26,8 @@ public class ResultRecord implements Serializable {
     public ResultRecord() {
     }
 
-    public ResultRecord(double x, double y, double r, boolean hit, LocalDateTime time, long execMillis) {
+    public ResultRecord(BigDecimal x, BigDecimal y, double r,
+                        boolean hit, LocalDateTime time, long execMillis) {
         this.x = x;
         this.y = y;
         this.r = r;
@@ -30,6 +35,7 @@ public class ResultRecord implements Serializable {
         this.time = time;
         this.execMillis = execMillis;
     }
+
 
     public Long getId() {
         return id;
@@ -39,21 +45,27 @@ public class ResultRecord implements Serializable {
         this.id = id;
     }
 
-    public double getX() {
+    public BigDecimal getX() {
         return x;
     }
 
-    public void setX(double x) {
-        this.x = x;
+    public void setX(BigDecimal x) {
+        if (x != null) {
+            this.x = x;
+        }
     }
 
-    public double getY() {
+
+    public BigDecimal getY() {
         return y;
     }
 
-    public void setY(double y) {
-        this.y = y;
+    public void setY(BigDecimal y) {
+        if (y != null) {
+            this.y = y;
+        }
     }
+
 
     public double getR() {
         return r;
