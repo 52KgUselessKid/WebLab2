@@ -212,3 +212,9 @@ button {
 .r-radio:hover {
     transform: scale(1.1);
 }
+.clock-image {
+            max-width: 600px;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }

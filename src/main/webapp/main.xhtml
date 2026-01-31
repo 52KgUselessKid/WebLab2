@@ -37,14 +37,12 @@
                         <p:slider id="xSlider"
                                   for="hiddenX"
                                   min="0"
-                                  max="100"
-                                  step="1"
-                                  value="#{pointBean.x}"
-                                  displayValue="false"
-                                  onSlide="adjustSliderValue()"
-                                  style="width: 100%;"/>
-
-
+                                  max="200"
+                        step="1"
+                        value="#{pointBean.sliderPercent}"
+                        displayValue="false"
+                        onSlide="adjustSliderValue()"
+                        style="width: 100%;"/>
                     </div>
 
                     <!-- Y: p:inputText с валидацией -->

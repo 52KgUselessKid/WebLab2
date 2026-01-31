@@ -29,17 +29,14 @@ public class PointBean implements Serializable {
 
     // Геттеры и сеттеры для X, Y, R (старые — оставляем)
     public double getX() { return x; }
-    public void setX(double x) {
-        // Защита от мусора 0–100
-        if (x >= 0 && x <= 100) {
-            // Предполагаем, что это процент → пересчитываем
-            this.x = -5 + (x / 100.0) * 10;  // от -5 до 5
-        } else {
-            this.x = x;
-        }
+    public void setX(double incomingPercent) {
+        // incomingPercent — это значение со слайдера, обычно 0..100
+        double percent = Math.max(0.0, Math.min(100.0, incomingPercent));
 
-        // Дополнительная обрезка
-        //this.x = Math.max(-5, Math.min(5, x));  // жёстко обрезаем до допустимого
+        double rawX = -5.0 + (percent / 100.0) * 10.0;
+
+        // Главное — принудительное округление до 2 знаков
+        this.x = Math.round(rawX * 100.0) / 100.0;
     }
 
     public double getY() { return y; }
@@ -148,9 +145,43 @@ public class PointBean implements Serializable {
     }
 
     private boolean isHit(double x, double y, double r) {
-        // ваша логика попадания — оставляем как есть
-        if (x <= 0 && x >= -r && y >= 0 && y <= r / 2.0) return true;
-        if (x >= 0 && y <= 0 && y >= x - r / 2.0) return true;
-        return x <= 0 && y <= 0 && (x * x + y * y) <= (r * r / 4.0);
+        // 1. Правый верхний квадрант → треугольник
+        if (x >= 0 && y >= 0) {
+            return x <= r / 2.0 && y <= r - 2.0 * x;
+            // или более безопасно:
+            // return x <= r / 2.0 && y <= r * (1 - 2.0 * x / r);
+        }
+
+        // 2. Квадрант x ≤ 0, y ≥ 0 → прямоугольник -R ≤ x ≤ 0, 0 ≤ y ≤ R
+        if (x <= 0 && y >= 0) {
+            if (x >= -r && y <= r) {
+                return true;
+            }
+            return false;
+        }
+
+        // 3. Квадрант x < 0, y < 0 → пустой
+        if (x < 0 && y < 0) {
+            return false;
+        }
+
+        // 4. Квадрант x ≥ 0, y ≤ 0 → четверть круга радиусом R
+        if (x >= 0 && y <= 0) {
+            return (x * x + y * y) <= (r * r);
+        }
+
+        return false;
+    }
+
+    private int sliderPercent = 100;  // центр = 0.0
+
+    public int getSliderPercent() {
+        return sliderPercent;
+    }
+
+    public void setSliderPercent(int percent) {
+        this.sliderPercent = percent;
+        double raw = -5.0 + (percent / 200.0) * 10.0;
+        this.x = Math.round(raw * 100.0) / 100.0;  // → -1.40, -1.35, -1.30 ...
     }
 }

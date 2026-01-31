@@ -25,6 +25,9 @@
                 Текущее время:
                 <h:outputText id="time" value="#{clockBean.currentTime}"/>
                 <p:poll interval="13" update="time"/>
+                <img src="#{request.contextPath}/img/welcome.jpg"
+                     alt="Аналоговые часы"
+                     class="clock-image"/>
             </div>
         </h:form>
 

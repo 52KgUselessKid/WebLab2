@@ -313,20 +313,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function drawSavedPoints(r) {
-console.log("drawSavedPoints вызван с r =", r);
-    // Самый надёжный селектор: все <tr> внутри контейнера результатов
-    const tableContainer = document.getElementById('resultsPanel') ||
-                          document.getElementById('results') ||
-                          document.querySelector('[id*="results"]');
+    const tableContainer = document.getElementById('resultsPanel');
+    if (!tableContainer) return;
 
-    if (!tableContainer) {
-        console.warn("Контейнер результатов не найден");
-        return;
-    }
-
-    // Ищем все строки таблицы внутри контейнера
     const rows = tableContainer.querySelectorAll('tr');
-
     const canvas = document.getElementById('areaGraph');
     if (!canvas) return;
 
@@ -334,51 +324,50 @@ console.log("drawSavedPoints вызван с r =", r);
     const center = canvas.width / 2;
     const scale = canvas.width / 10;
 
+    let drawnCount = 0;
+
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
-        if (cells.length >= 6) {  // X, Y, R, Результат, Время, Время работы
-            const pointRText = cells[2].textContent.trim();
-            const pointR = parseFloat(pointRText);
+        if (cells.length < 4) return;
 
-            if (!isNaN(pointR) && Math.abs(pointR - r) < 0.001) {
-                const x = parseFloat(cells[0].textContent.trim());
-                const y = parseFloat(cells[1].textContent.trim());
-                const resultCell = cells[3];
-                const isHit = resultCell && resultCell.classList.contains('hit');
+        const xStr = cells[0].textContent.trim();
+        const yStr = cells[1].textContent.trim();
+        const rStr = cells[2].textContent.trim();
+        const resultText = cells[3].textContent.trim();
 
-                if (!isNaN(x) && !isNaN(y)) {
-                    const pointX = center + x * scale;
-                    const pointY = center - y * scale;
+        const px = parseFloat(xStr);
+        const py = parseFloat(yStr);
+        const pr = parseFloat(rStr);
 
-                    ctx.fillStyle = isHit ? '#4CAF50' : '#dc3545';
-                    ctx.beginPath();
-                    ctx.arc(pointX, pointY, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
+        if (isNaN(px) || isNaN(py) || isNaN(pr)) return;
+        if (Math.abs(pr - r) > 0.001) return;
+
+        const isHit = resultText.includes("Попадание") || resultText.toLowerCase().includes("hit");
+
+        const pointX = center + px * scale;
+        const pointY = center - py * scale;
+
+        ctx.fillStyle = isHit ? '#28a745' : '#dc3545';   // зелёный / красный
+        ctx.beginPath();
+        ctx.arc(pointX, pointY, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawnCount++;
     });
-    console.log("Нарисовано точек:", /* количество нарисованных */);
+
+    console.log(`Нарисовано точек для R=${r}: ${drawnCount}`);
 }
 
 function drawGraph(r = 3) {
-    console.log("drawGraph вызван с r =", r, "caller:", new Error().stack.split("\n")[2].trim());
-    // Защита от NaN, undefined, некорректных значений
-    if (typeof r !== 'number' || isNaN(r) || r <= 0) {
-        console.warn("Некорректный r → используем 3 по умолчанию");
-        r = 3;
-    }
+    if (typeof r !== 'number' || isNaN(r) || r <= 0) r = 3;
 
     const canvas = document.getElementById('areaGraph');
-    if (!canvas) {
-        console.warn("Canvas не найден");
-        return;
-    }
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const size = canvas.width;   // 300
+    const size = canvas.width;
     const center = size / 2;
-    const scale = size / 10;     // 30 px = 1 единица
+    const scale = size / 10;
 
     ctx.clearRect(0, 0, size, size);
 
@@ -390,49 +379,50 @@ function drawGraph(r = 3) {
     ctx.moveTo(0, center); ctx.lineTo(size, center);
     ctx.stroke();
 
-    // Стрелки (немного крупнее для видимости)
+    // Стрелки (опционально)
     ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.moveTo(center, 0); ctx.lineTo(center-7,14); ctx.lineTo(center+7,14); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(size, center); ctx.lineTo(size-14,center-7); ctx.lineTo(size-14,center+7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(center, 0);     ctx.lineTo(center-7,14); ctx.lineTo(center+7,14); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(size, center);  ctx.lineTo(size-14,center-7); ctx.lineTo(size-14,center+7); ctx.fill();
 
-    // Область
-    ctx.fillStyle = 'rgba(30, 144, 255, 0.28)';
+    // ── Заливка области попадания ───────────────────────────────
+    ctx.fillStyle   = 'rgba(30, 144, 255, 0.22)';
     ctx.strokeStyle = '#1e90ff';
-    ctx.lineWidth = 1.8;
+    ctx.lineWidth   = 1.6;
 
-    const half = r / 2;
-    const rPx = r * scale;
-    const halfPx = half * scale;
+    const rPx    = r * scale;
+    const halfRPx = (r / 2) * scale;
 
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, size, size);
     ctx.clip();
 
-    // 1. Прямоугольник (второй квадрант)
-    ctx.fillRect(center - rPx, center - halfPx, rPx, halfPx);
-    ctx.strokeRect(center - rPx, center - halfPx, rPx, halfPx);
+    // 1. Верхний левый (прямоугольник)   x: -R..0    y: 0..R
+    ctx.fillRect(center - rPx, center - rPx, rPx, rPx);
+    ctx.strokeRect(center - rPx, center - rPx, rPx, rPx);
 
-    // 2. Четверть круга (третий квадрант)
+    // 2. Верхний правый (треугольник)    x: 0..R/2   y: 0..R
     ctx.beginPath();
-    ctx.arc(center, center, halfPx, Math.PI, 1.5 * Math.PI, false);
+    ctx.moveTo(center, center);                // (0,0)
+    ctx.lineTo(center + halfRPx, center);      // (R/2, 0)
+    ctx.lineTo(center, center - rPx);          // (0, R)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 3. Нижний правый (четверть круга)  x: 0..R     y: -R..0
+    ctx.beginPath();
+    ctx.arc(center, center, rPx, 0, Math.PI / 2, false);   // от 0 до 90°  // от -90° до 0°
     ctx.lineTo(center, center);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // 3. Треугольник (четвёртый квадрант)
-    ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.lineTo(center, center + halfPx);
-    ctx.lineTo(center + halfPx, center);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    // Нижний левый — не рисуем (пустой)
 
     ctx.restore();
 
-    // Метки
+    // Метки осей (оставляем как было или упрощаем по желанию)
     ctx.fillStyle = '#000';
     ctx.font = '11px Arial';
     ctx.textAlign = 'center';
@@ -441,16 +431,14 @@ function drawGraph(r = 3) {
         const px = center + i * scale;
         const py = center - i * scale;
         ctx.beginPath(); ctx.moveTo(px, center-4); ctx.lineTo(px, center+4); ctx.stroke();
-        ctx.fillText(i, px, center + 20);
+        ctx.fillText(i, px, center + 18);
         ctx.beginPath(); ctx.moveTo(center-4, py); ctx.lineTo(center+4, py); ctx.stroke();
-        ctx.fillText(i, center - 22, py + 5);
+        ctx.fillText(i, center - 20, py + 5);
     }
-    ctx.fillText('X', size - 18, center - 12);
-    ctx.fillText('Y', center + 20, 22);
+    ctx.fillText('X', size - 18, center - 10);
+    ctx.fillText('Y', center + 22, 24);
 
     drawSavedPoints(r);
-
-    console.log("drawGraph завершён, r =", r);
 }
 
 function showError(message) {
