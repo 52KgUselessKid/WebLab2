@@ -3,23 +3,16 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
       lang="ru">
-<h:head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Лабораторная работа №2</title>
-    <h:outputStylesheet library="css" name="style.css"/>
-</h:head>
-<h:body>
-    <div class="container">
-        <header id="main-header">
-            <h1>Лабораторная работа №3</h1>
-            <div class="student-info">
-                <span class="fio">Кабиров Данияр Умарович</span>
-                <span class="group">Группа: P3223</span>
-                <span class="variant">Вариант: 4001</span>
-            </div>
-        </header>
+
+<ui:composition template="/template.xhtml">
+
+    <ui:define name="title">
+        Лабораторная работа №3 — Основная страница
+    </ui:define>
+
+    <ui:define name="content">
 
         <div class="input-section">
             <h:form id="pointForm">
@@ -39,14 +32,11 @@
                         <p:slider id="xSlider"
                                   widgetVar="xSliderWidget"
                                   for="hiddenX"
-                                  min="0"
-                                  max="100"
-                                  step="1"
+                                  min="0" max="100" step="1"
                                   onSlide="adjustSliderValue()"
                                   displayValue="false"
                                   style="width:150px;"/>
                     </div>
-
 
                     <div class="y-row">
                         <label for="y">Y:</label>
@@ -58,30 +48,17 @@
                         <p:message for="y" display="text"/>
                     </div>
 
-
                     <div class="r-row">
                         <label>R:</label>
-
-                        <div style="display:flex; gap:12px;">
-                            <h:selectBooleanCheckbox id="r1" value="#{pointBean.r1Selected}" onclick="updateR(this, 1.0)"/>
-                            <label for="r1">1</label>
-
-                            <h:selectBooleanCheckbox id="r15" value="#{pointBean.r15Selected}" onclick="updateR(this, 1.5)"/>
-                            <label for="r15">1.5</label>
-
-                            <h:selectBooleanCheckbox id="r2" value="#{pointBean.r2Selected}" onclick="updateR(this, 2.0)"/>
-                            <label for="r2">2</label>
-
-                            <h:selectBooleanCheckbox id="r25" value="#{pointBean.r25Selected}" onclick="updateR(this, 2.5)"/>
-                            <label for="r25">2.5</label>
-
-                            <h:selectBooleanCheckbox id="r3" value="#{pointBean.r3Selected}" onclick="updateR(this, 3.0)"/>
-                            <label for="r3">3</label>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                            <div><h:selectBooleanCheckbox id="r1"   value="#{pointBean.r1Selected}"   onclick="updateR(this, 1.0)"/><label for="r1">1</label></div>
+                            <div><h:selectBooleanCheckbox id="r15"  value="#{pointBean.r15Selected}"  onclick="updateR(this, 1.5)"/><label for="r15">1.5</label></div>
+                            <div><h:selectBooleanCheckbox id="r2"   value="#{pointBean.r2Selected}"   onclick="updateR(this, 2.0)"/><label for="r2">2</label></div>
+                            <div><h:selectBooleanCheckbox id="r25"  value="#{pointBean.r25Selected}"  onclick="updateR(this, 2.5)"/><label for="r25">2.5</label></div>
+                            <div><h:selectBooleanCheckbox id="r3"   value="#{pointBean.r3Selected}"   onclick="updateR(this, 3.0)"/><label for="r3">3</label></div>
                         </div>
-
                         <h:inputHidden id="r" value="#{pointBean.r}"/>
                     </div>
-
 
                     <div class="buttons-row">
                         <p:commandButton id="submitBtn" value="Проверить"
@@ -98,7 +75,6 @@
                                          oncomplete="redrawCurrentGraph()"/>
                     </div>
 
-
                     <p:messages id="messages" showDetail="true" closable="true"/>
                 </div>
             </h:form>
@@ -106,13 +82,13 @@
             <div id="error-banner"></div>
         </div>
 
-        <!-- График -->
+        
         <div class="graph-container">
             <canvas id="areaGraph" width="300" height="300"></canvas>
             <div id="canvasPoint"></div>
         </div>
 
-        <!-- Таблица результатов – центрирована -->
+        
         <div style="margin-top: 30px; display: flex; justify-content: center;">
             <div style="width: 100%; max-width: 900px;">
                 <h3 style="text-align: center;">Результаты</h3>
@@ -154,12 +130,12 @@
 
         <br/>
         <div style="text-align: center;">
-            <h:outputLink value="#{request.contextPath}/index.xhtml">
-                Вернуться к стартовой странице
-            </h:outputLink>
+            <h:form>
+                <h:commandLink value="Вернуться к стартовой странице" action="toIndex"/>
+            </h:form>
         </div>
-    </div>
 
-    <h:outputScript library="js" name="script.js"/>
-</h:body>
+    </ui:define>
+
+</ui:composition>
 </html>

@@ -127,7 +127,7 @@ button {
 #results h3 {
     margin-bottom: 8px;
 }
-/* в style.css добавь или замени */
+
 .results-table,
 .results-table th,
 .results-table td {
@@ -224,11 +224,11 @@ button {
     align-items: center;
     justify-content: center;
     gap: 24px;
-    flex-wrap: wrap; /* чтобы на маленьких экранах элементы переносились */
+    flex-wrap: wrap;
     margin-bottom: 20px;
 }
 
-/* Контейнеры для каждого блока */
+
 .x-row,
 .y-row,
 .r-row,

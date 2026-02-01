@@ -9,7 +9,7 @@ class PointChecker {
         localStorage.clear();
        this.appContextPath = this.getContextPath();
            this.setupEventListeners();
-           this.restoreSelection();   // ← сначала восстанавливаем выбор
+           this.restoreSelection();   
            drawGraph();
     }
     getContextPath() {
@@ -18,13 +18,13 @@ class PointChecker {
         return contextPath || '';
     }
     setupEventListeners() {
-//        document.querySelectorAll('.r-radio').forEach(radio => {
-//    radio.addEventListener('change', (e) => {
-//        if (e.target.checked) {
-//            this.selectRValue(e.target.value);
-//        }
-//    });
-//});
+
+
+
+
+
+
+
         const yInput = document.getElementById('pointForm:y');
         if (yInput) {
             yInput.addEventListener('input', (e) => {
@@ -47,18 +47,18 @@ class PointChecker {
         }
     }
     selectXValue(value) {
-        // value может быть реальным X (-5..5) или процентом — приводим к числу
+        
         const num = this.parseNumber(value);
         if (isNaN(num)) return;
 
-        // Если значение в диапазоне -5..5 — переводим в процент
+        
         let percent;
         if (num >= -5 && num <= 5) {
             percent = Math.round(((num + 5) / 10) * 100);
         } else if (num >= 0 && num <= 100) {
             percent = Math.round(num);
         } else {
-            // неизвестный формат — игнорируем
+            
             return;
         }
 
@@ -153,7 +153,7 @@ class PointChecker {
         const center = size / 2;
         const scale = size / 10;
 
-        // Получаем R (как в вашем коде)
+        
         let selectedRadio = document.querySelector('.r-radio:checked');
         let rValue = null;
         if (selectedRadio) {
@@ -179,10 +179,10 @@ class PointChecker {
       const realX = (clickX - center) / scale;
       const realY = (center - clickY) / scale;
 
-      // Формируем строку для поля ввода (максимум 16 знаков после запятой)
+      
       function formatNum(num) {
           let s = num.toPrecision(16);
-          // убираем лишние нули
+          
           s = s.replace(/\.?0+$/, '');
           return s;
       }
@@ -190,7 +190,7 @@ class PointChecker {
       const strX = formatNum(realX);
       const strY = formatNum(realY);
 
-      // Записываем в input
+      
       const xInput = document.getElementById('pointForm:xInput');
       if (xInput) {
           xInput.value = strX;
@@ -205,7 +205,7 @@ class PointChecker {
           yInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
 
-       // Slider/hiddenX можно обновить, но только если нет ручного ввода
+       
        const hiddenX = document.getElementById('pointForm:hiddenX');
        if (hiddenX) {
            const percentX = Math.round(((realX + 5) / 10) * 100);
@@ -217,33 +217,33 @@ class PointChecker {
        }
 
 
-        // Перестраховка R
+        
         const hiddenR = document.getElementById('pointForm:r');
         if (hiddenR) hiddenR.value = rValue;
 
-        // Показываем временную точку (позиционируем относительно окна)
-//        const point = document.getElementById('canvasPoint');
-//        if (point) {
-//            // позиционируем относительно viewport (как у вас было)
-//            point.style.left = `${clickX + rect.left}px`;
-//            point.style.top = `${clickY + rect.top}px`;
-//            point.style.display = 'block';
-//        }
+        
 
 
 
-        // Надёжный поиск кнопки отправки: ищем элемент, id которого оканчивается на submitBtn
-        // (это работает независимо от префикса clientId)
+
+
+
+
+
+
+
+        
+        
         const submitBtn = document.querySelector('[id$="submitBtn"], [id$="checkBtn"]');
 
-        // Если нашли — кликаем по ней; иначе — отправляем форму нативно
+        
         if (submitBtn) {
-            // Небольшая задержка 0..50ms помогает избежать гонок с обновлением DOM/виджетов
+            
             setTimeout(() => {
                 try {
                     submitBtn.click();
                 } catch (err) {
-                    // fallback: нативная отправка формы
+                    
                     const form = document.getElementById('pointForm');
                     if (form) form.submit();
                 }
@@ -295,7 +295,7 @@ class PointChecker {
              }
          } catch (e) {
              console.error("Ошибка в restoreSelection", e);
-             // дефолт
+             
              const def = document.querySelector('.r-radio[value="3"]');
              if (def) {
                  def.checked = true;
@@ -345,7 +345,7 @@ function drawSavedPoints(r) {
         const pointX = center + px * scale;
         const pointY = center - py * scale;
 
-        ctx.fillStyle = isHit ? '#28a745' : '#dc3545';   // зелёный / красный
+        ctx.fillStyle = isHit ? '#28a745' : '#dc3545';   
         ctx.beginPath();
         ctx.arc(pointX, pointY, 4.5, 0, Math.PI * 2);
         ctx.fill();
@@ -369,7 +369,7 @@ function drawGraph(r = 3) {
 
     ctx.clearRect(0, 0, size, size);
 
-    // Оси
+    
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -377,12 +377,12 @@ function drawGraph(r = 3) {
     ctx.moveTo(0, center); ctx.lineTo(size, center);
     ctx.stroke();
 
-    // Стрелки (опционально)
+    
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.moveTo(center, 0);     ctx.lineTo(center-7,14); ctx.lineTo(center+7,14); ctx.fill();
     ctx.beginPath(); ctx.moveTo(size, center);  ctx.lineTo(size-14,center-7); ctx.lineTo(size-14,center+7); ctx.fill();
 
-    // ── Заливка области попадания ───────────────────────────────
+    
     ctx.fillStyle   = 'rgba(30, 144, 255, 0.22)';
     ctx.strokeStyle = '#1e90ff';
     ctx.lineWidth   = 1.6;
@@ -395,32 +395,32 @@ function drawGraph(r = 3) {
     ctx.rect(0, 0, size, size);
     ctx.clip();
 
-    // 1. Верхний левый (прямоугольник)   x: -R..0    y: 0..R
+    
     ctx.fillRect(center - rPx, center - rPx, rPx, rPx);
     ctx.strokeRect(center - rPx, center - rPx, rPx, rPx);
 
-    // 2. Верхний правый (треугольник)    x: 0..R/2   y: 0..R
+    
     ctx.beginPath();
-    ctx.moveTo(center, center);                // (0,0)
-    ctx.lineTo(center + halfRPx, center);      // (R/2, 0)
-    ctx.lineTo(center, center - rPx);          // (0, R)
+    ctx.moveTo(center, center);                
+    ctx.lineTo(center + halfRPx, center);      
+    ctx.lineTo(center, center - rPx);          
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // 3. Нижний правый (четверть круга)  x: 0..R     y: -R..0
+    
     ctx.beginPath();
-    ctx.arc(center, center, rPx, 0, Math.PI / 2, false);   // от 0 до 90°  // от -90° до 0°
+    ctx.arc(center, center, rPx, 0, Math.PI / 2, false);   
     ctx.lineTo(center, center);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Нижний левый — не рисуем (пустой)
+    
 
     ctx.restore();
 
-    // Метки осей (оставляем как было или упрощаем по желанию)
+    
     ctx.fillStyle = '#000';
     ctx.font = '11px Arial';
     ctx.textAlign = 'center';
@@ -473,26 +473,26 @@ function updateR(checkbox, intendedR) {
         return;
     }
 
-    // снимаем галочки с остальных в этой же группе
+    
     document.querySelectorAll('.r-row input[type="checkbox"]').forEach(cb => {
         if (cb !== checkbox) cb.checked = false;
     });
 
     if (checkbox.checked) {
-        // ставим выбранное значение
+        
         const hiddenR = document.getElementById('pointForm:r');
         if (hiddenR) hiddenR.value = rValue;
 
-        // перерисовываем график
+        
         drawGraph(rValue);
 
-        // сохраняем выбор в localStorage
+        
         try {
             localStorage.setItem('selectedR', rValue);
         } catch(e) { console.error(e); }
 
     } else {
-        // если галочку сняли — возвращаем дефолт 3
+        
         const defCheckbox = document.querySelector('.r-row input[id$="r3"]');
         if (defCheckbox) defCheckbox.checked = true;
 
@@ -528,10 +528,10 @@ function updateXFromInput() {
     let val = parseFloat(input.value.replace(',', '.'));
     if (isNaN(val)) return;
 
-    // clamp
+    
     val = Math.max(-5, Math.min(5, val));
 
-    // перевод в процент
+    
     const percent = Math.round(((val + 5) / 10) * 100);
 
     hidden.value = percent;
@@ -554,7 +554,7 @@ function updateXFromSlider() {
 
 function updateClientTime() {
     const now = new Date();
-    // Форматируем как dd.MM.yyyy HH:mm:ss
+    
     const day   = String(now.getDate()).padStart(2, '0');
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const year  = now.getFullYear();
@@ -567,18 +567,18 @@ function updateClientTime() {
     if (span) span.textContent = formatted;
 }
 
-// Первичный вывод сразу
+
 document.addEventListener('DOMContentLoaded', updateClientTime);
 
-// Обновление каждые 13 секунд
+
 setInterval(updateClientTime, 13000);
 
-// Дополнительно: можно отслеживать изменения системного времени через requestAnimationFrame для мгновенной реакции
+
 (function monitorSystemTime() {
     let last = Date.now();
     function tick() {
         const now = Date.now();
-        // если системное время поменялось более чем на 1 секунду — обновляем моментально
+        
         if (Math.abs(now - last) > 2000) {
             updateClientTime();
         }

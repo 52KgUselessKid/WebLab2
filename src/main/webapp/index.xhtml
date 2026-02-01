@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
-      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets"
       lang="ru">
-<h:head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Старт</title>
-    <h:outputStylesheet library="css" name="style.css"/>
-</h:head>
-<h:body>
-    <div class="container">
-        <header id="main-header">
-            <h1>Старт</h1>
-        </header>
+
+<ui:composition template="/template.xhtml">
+
+    <ui:define name="title">
+        Старт
+    </ui:define>
+
+    <ui:define name="content">
 
         <h:form id="clockForm">
             <div>
@@ -25,16 +22,18 @@
         <br/>
 
         <img src="#{request.contextPath}/img/welcome.jpg"
+             alt="Welcome image"
              class="clock-image"/>
 
-        <br/>
-        <!-- Самый надёжный способ — обычная ссылка, не commandLink -->
-        <h:outputLink value="#{request.contextPath}/main.xhtml">
-            Перейти к основной странице приложения
-        </h:outputLink>
-    </div>
+        <br/><br/>
 
-    <h:outputScript library="js" name="script.js"/>
+        <div style="text-align: center; font-size: 1.2em;">
+            <h:form>
+                <h:commandLink value="Перейти к основной странице приложения" action="toMain"/>
+            </h:form>
+        </div>
 
-</h:body>
+    </ui:define>
+
+</ui:composition>
 </html>

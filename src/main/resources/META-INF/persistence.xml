@@ -18,7 +18,6 @@
             <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
             <property name="eclipselink.logging.level" value="OFF"/>
 
-            <!-- Отключаем JSON-платформы, чтобы не было OracleJsonPlatform ошибки -->
             <property name="eclipselink.json.platform" value="org.eclipse.persistence.platform.database.json.DefaultJsonPlatform"/>
         </properties>
     </persistence-unit>

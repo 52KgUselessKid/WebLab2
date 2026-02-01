@@ -5,7 +5,7 @@ import jakarta.inject.Named;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Named("clockBean")               // ← обязательно!
+@Named("clockBean")
 @RequestScoped
 public class ClockBean {
 

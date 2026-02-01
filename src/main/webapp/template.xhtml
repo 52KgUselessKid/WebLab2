@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      lang="ru">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><ui:insert name="title">Лабораторная работа</ui:insert></title>
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+<h:body>
+    <div class="container">
+
+       
+        <header id="main-header">
+            <h1>Лабораторная работа №3</h1>
+            <div class="student-info">
+                <span class="fio">Кабиров Данияр Умарович</span>
+                <span class="group">Группа: P3223</span>
+                <span class="variant">Вариант: 4001</span>
+            </div>
+        </header>
+
+        
+        <ui:insert name="content"/>
+
+    </div>
+
+    <h:outputScript library="js" name="script.js"/>
+</h:body>
+</html>

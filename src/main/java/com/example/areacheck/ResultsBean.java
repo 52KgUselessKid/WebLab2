@@ -32,7 +32,7 @@ public class ResultsBean implements Serializable {
         em.getTransaction().begin();
         em.persist(record);
         em.getTransaction().commit();
-        results.add(0, record);  // Add to beginning for latest first
+        results.add(0, record);  
     }
 
     public void clear() {

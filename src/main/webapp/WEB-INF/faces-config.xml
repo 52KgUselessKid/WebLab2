@@ -4,7 +4,24 @@
               xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
               version="4.0">
 
-    <!-- Здесь ничего не нужно, если бины — CDI + @Named -->
-    <!-- Навигация через outputLink или прямые пути -->
+        <navigation-rule>
+            <from-view-id>/index.xhtml</from-view-id>
+
+            <navigation-case>
+                <from-outcome>toMain</from-outcome>
+                <to-view-id>/main.xhtml</to-view-id>
+                <redirect/>
+            </navigation-case>
+        </navigation-rule>
+
+        <navigation-rule>
+            <from-view-id>/main.xhtml</from-view-id>
+
+            <navigation-case>
+                <from-outcome>toIndex</from-outcome>
+                <to-view-id>/index.xhtml</to-view-id>
+                <redirect/>
+            </navigation-case>
+        </navigation-rule>
 
 </faces-config>

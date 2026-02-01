@@ -110,9 +110,9 @@ public class ResultRecord implements Serializable {
 
     public String getxPlain() {
         if (x == null) return "";
-        // округляем до 5 знаков после запятой
+        
         BigDecimal rounded = x.setScale(5, RoundingMode.HALF_UP);
-        // убираем лишние нули
+        
         return rounded.stripTrailingZeros().toPlainString();
     }
 
