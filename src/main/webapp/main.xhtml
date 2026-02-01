@@ -13,32 +13,28 @@
 <h:body>
     <div class="container">
         <header id="main-header">
-            <h1>Лабораторная работа №2</h1>
+            <h1>Лабораторная работа №3</h1>
             <div class="student-info">
                 <span class="fio">Кабиров Данияр Умарович</span>
                 <span class="group">Группа: P3223</span>
-                <span class="variant">Вариант: 2555</span>
+                <span class="variant">Вариант: 4001</span>
             </div>
         </header>
 
         <div class="input-section">
             <h:form id="pointForm">
 
-                <div class="form-row" style="flex-direction: column; align-items: center; gap: 16px;">
+                <div class="form-row-horizontal">
 
-                    <div style="width: 100%; max-width: 400px; margin: 0 auto 20px auto;">
-                        <div style="text-align: center; margin-bottom: 8px;">
+                    <div class="x-row">
+                        <label for="xInput">X:</label>
 
-                                <label for="xInput">X: </label>
-                                <p:inputText id="xInput"
-                                             value="#{pointBean.x}"
-                                             oninput="updateXFromInput()"
-                                             style="width:80px; text-align:center;"/>
+                        <p:inputText id="xInput"
+                                     value="#{pointBean.xRaw}"
+                                     oninput="updateXFromInput()"
+                                     style="width:60px;"/>
 
-
-                        </div>
-
-                        <h:inputHidden id="hiddenX" value="#{pointBean.x}"/>
+                        <h:inputHidden id="hiddenX" value="#{pointBean.sliderPercent}"/>
 
                         <p:slider id="xSlider"
                                   widgetVar="xSliderWidget"
@@ -48,62 +44,46 @@
                                   step="1"
                                   onSlide="adjustSliderValue()"
                                   displayValue="false"
-                                  style="width: 100%;"/>
-
+                                  style="width:150px;"/>
                     </div>
 
-                    <!-- Y: p:inputText с валидацией -->
-                    <div>
-                        <label for="y">Y: </label>
+
+                    <div class="y-row">
+                        <label for="y">Y:</label>
                         <p:inputText id="y"
                                      value="#{pointBean.y}"
                                      required="true"
-                                     validatorMessage="Y должно быть числом от -5 до 5">
-                            <f:validateDoubleRange minimum="-5" maximum="5"/>
-                        </p:inputText>
+                                     validatorMessage="Y должно быть числом от -5 до 5"
+                                     style="width:60px;"/>
                         <p:message for="y" display="text"/>
                     </div>
 
-                    <!-- Блок R -->
-                    <div>
-                        <label>R: </label>
-                        <div style="display: flex; gap: 24px; margin-top: 8px; justify-content: center;">
-                            <div>
-                                <h:selectBooleanCheckbox id="r1" class="r-radio"
-                                                         value="#{pointBean.r1Selected}"
-                                                         onclick="updateR(this, 1.0)"/>
-                                <label for="r1">1</label>
-                            </div>
-                            <div>
-                                <h:selectBooleanCheckbox id="r15" class="r-radio"
-                                                         value="#{pointBean.r15Selected}"
-                                                         onclick="updateR(this, 1.5)"/>
-                                <label for="r15">1.5</label>
-                            </div>
-                            <div>
-                                <h:selectBooleanCheckbox id="r2" class="r-radio"
-                                                         value="#{pointBean.r2Selected}"
-                                                         onclick="updateR(this, 2.0)"/>
-                                <label for="r2">2</label>
-                            </div>
-                            <div>
-                                <h:selectBooleanCheckbox id="r25" class="r-radio"
-                                                         value="#{pointBean.r25Selected}"
-                                                         onclick="updateR(this, 2.5)"/>
-                                <label for="r25">2.5</label>
-                            </div>
-                            <div>
-                                <h:selectBooleanCheckbox id="r3" class="r-radio"
-                                                         value="#{pointBean.r3Selected}"
-                                                         onclick="updateR(this, 3.0)"/>
-                                <label for="r3">3</label>
-                            </div>
+
+                    <div class="r-row">
+                        <label>R:</label>
+
+                        <div style="display:flex; gap:12px;">
+                            <h:selectBooleanCheckbox id="r1" value="#{pointBean.r1Selected}" onclick="updateR(this, 1.0)"/>
+                            <label for="r1">1</label>
+
+                            <h:selectBooleanCheckbox id="r15" value="#{pointBean.r15Selected}" onclick="updateR(this, 1.5)"/>
+                            <label for="r15">1.5</label>
+
+                            <h:selectBooleanCheckbox id="r2" value="#{pointBean.r2Selected}" onclick="updateR(this, 2.0)"/>
+                            <label for="r2">2</label>
+
+                            <h:selectBooleanCheckbox id="r25" value="#{pointBean.r25Selected}" onclick="updateR(this, 2.5)"/>
+                            <label for="r25">2.5</label>
+
+                            <h:selectBooleanCheckbox id="r3" value="#{pointBean.r3Selected}" onclick="updateR(this, 3.0)"/>
+                            <label for="r3">3</label>
                         </div>
+
                         <h:inputHidden id="r" value="#{pointBean.r}"/>
                     </div>
 
-                    <!-- Кнопки -->
-                    <div style="margin-top: 16px; display: flex; gap: 16px;">
+
+                    <div class="buttons-row">
                         <p:commandButton id="submitBtn" value="Проверить"
                                          action="#{pointBean.check}"
                                          update="resultsPanel messages"
@@ -117,6 +97,7 @@
                                          onclick="return confirm('Очистить все результаты?');"
                                          oncomplete="redrawCurrentGraph()"/>
                     </div>
+
 
                     <p:messages id="messages" showDetail="true" closable="true"/>
                 </div>
@@ -143,11 +124,11 @@
                                  style="width:100%; border-collapse: collapse; margin: 0 auto;">
                         <h:column>
                             <f:facet name="header">X</f:facet>
-                            #{rec.x}
+                            #{rec.xPlain}
                         </h:column>
                         <h:column>
                             <f:facet name="header">Y</f:facet>
-                            #{rec.y}
+                            #{rec.yPlain}
                         </h:column>
                         <h:column>
                             <f:facet name="header">R</f:facet>

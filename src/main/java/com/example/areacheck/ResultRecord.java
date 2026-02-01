@@ -3,6 +3,7 @@ package com.example.areacheck;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -106,4 +107,20 @@ public class ResultRecord implements Serializable {
     public String getFormattedExec() {
         return String.format("%.3f мс", execMillis / 1_000_000.0);
     }
+
+    public String getxPlain() {
+        if (x == null) return "";
+        // округляем до 5 знаков после запятой
+        BigDecimal rounded = x.setScale(5, RoundingMode.HALF_UP);
+        // убираем лишние нули
+        return rounded.stripTrailingZeros().toPlainString();
+    }
+
+    public String getyPlain() {
+        if (y == null) return "";
+        BigDecimal rounded = y.setScale(5, RoundingMode.HALF_UP);
+        return rounded.stripTrailingZeros().toPlainString();
+    }
+
+
 }

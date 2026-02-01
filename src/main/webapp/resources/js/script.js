@@ -176,38 +176,46 @@ class PointChecker {
             }
         }
 
-        // Реальные координаты в единицах (-5..5)
-        const realX = (clickX - center) / scale;
-        const realY = (center - clickY) / scale;
+      const realX = (clickX - center) / scale;
+      const realY = (center - clickY) / scale;
 
-        const clampedX = Math.max(-5, Math.min(5, Math.round(realX * 100) / 100));
-        const clampedY = Math.max(-5, Math.min(5, Math.round(realY * 100) / 100));
+      // Формируем строку для поля ввода (максимум 16 знаков после запятой)
+      function formatNum(num) {
+          let s = num.toPrecision(16);
+          // убираем лишние нули
+          s = s.replace(/\.?0+$/, '');
+          return s;
+      }
 
-        // Переводим clampedX в процент 0..100 (для slider/hiddenX)
-        const min = -5;
-        const max = 5;
-        const percentX = Math.round(((clampedX - min) / (max - min)) * 100);
+      const strX = formatNum(realX);
+      const strY = formatNum(realY);
 
-        // Записываем в hiddenX (процент) и диспатчим события, чтобы JSF/PrimeFaces увидели изменение
-        const hiddenX = document.getElementById('pointForm:hiddenX');
-        if (hiddenX) {
-            hiddenX.value = percentX;
+      // Записываем в input
+      const xInput = document.getElementById('pointForm:xInput');
+      if (xInput) {
+          xInput.value = strX;
+          xInput.dispatchEvent(new Event('input', { bubbles: true }));
+          xInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
 
-            // Сигнализируем о изменении — dispatch input/change
-            const inputEvent = new Event('input', { bubbles: true });
-            const changeEvent = new Event('change', { bubbles: true });
-            hiddenX.dispatchEvent(inputEvent);
-            hiddenX.dispatchEvent(changeEvent);
-        }
+      const yInput = document.getElementById('pointForm:y');
+      if (yInput) {
+          yInput.value = strY;
+          yInput.dispatchEvent(new Event('input', { bubbles: true }));
+          yInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
 
-        // Записываем Y в поле (реальные единицы)
-        const yInput = document.getElementById('pointForm:y');
-        if (yInput) {
-            yInput.value = clampedY;
-            // тоже диспатчим, чтобы валидация/PrimeFaces увидели
-            yInput.dispatchEvent(new Event('input', { bubbles: true }));
-            yInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+       // Slider/hiddenX можно обновить, но только если нет ручного ввода
+       const hiddenX = document.getElementById('pointForm:hiddenX');
+       if (hiddenX) {
+           const percentX = Math.round(((realX + 5) / 10) * 100);
+           hiddenX.value = percentX;
+           const inputEvent = new Event('input', { bubbles: true });
+           const changeEvent = new Event('change', { bubbles: true });
+           hiddenX.dispatchEvent(inputEvent);
+           hiddenX.dispatchEvent(changeEvent);
+       }
+
 
         // Перестраховка R
         const hiddenR = document.getElementById('pointForm:r');
@@ -459,38 +467,46 @@ function handleAfterClear() {
 }
 
 function updateR(checkbox, intendedR) {
-     // intendedR приходит из onclick как число (1.0, 1.5, 2.0, 2.5, 3.0)
+    const rValue = parseFloat(intendedR);
+    if (isNaN(rValue)) {
+        console.warn("updateR получил некорректное значение:", intendedR);
+        return;
+    }
 
-     // Приводим к числу сразу
-     const rValue = parseFloat(intendedR);
-     if (isNaN(rValue)) {
-         console.warn("updateR получил некорректный intendedR:", intendedR);
-         return;  // ← не рисуем вообще, если пришло что-то невалидное
-     }
+    // снимаем галочки с остальных в этой же группе
+    document.querySelectorAll('.r-row input[type="checkbox"]').forEach(cb => {
+        if (cb !== checkbox) cb.checked = false;
+    });
 
-     // Снимаем галочки с остальных
-     document.querySelectorAll('input.r-radio[type="checkbox"]').forEach(cb => {
-         if (cb !== checkbox) cb.checked = false;
-     });
+    if (checkbox.checked) {
+        // ставим выбранное значение
+        const hiddenR = document.getElementById('pointForm:r');
+        if (hiddenR) hiddenR.value = rValue;
 
-     if (checkbox.checked) {
-         // Устанавливаем значение
-         document.getElementById('pointForm:r').value = rValue;
-         localStorage.setItem('selectedR', rValue);
+        // перерисовываем график
+        drawGraph(rValue);
 
-         // Рисуем с новым радиусом
-         drawGraph(rValue);
-     } else {
-         // Возвращаем дефолт 3
-         const defCheckbox = document.querySelector('input.r-radio[value="3"]');
-         if (defCheckbox) {
-             defCheckbox.checked = true;
-             document.getElementById('pointForm:r').value = '3';
-             localStorage.setItem('selectedR', '3');
-             drawGraph(3);
-         }
-     }
- }
+        // сохраняем выбор в localStorage
+        try {
+            localStorage.setItem('selectedR', rValue);
+        } catch(e) { console.error(e); }
+
+    } else {
+        // если галочку сняли — возвращаем дефолт 3
+        const defCheckbox = document.querySelector('.r-row input[id$="r3"]');
+        if (defCheckbox) defCheckbox.checked = true;
+
+        const hiddenR = document.getElementById('pointForm:r');
+        if (hiddenR) hiddenR.value = 3;
+
+        drawGraph(3);
+
+        try {
+            localStorage.setItem('selectedR', 3);
+        } catch(e) { console.error(e); }
+    }
+}
+
 
  function redrawCurrentGraph() {
      const currentRInput = document.getElementById('pointForm:r');
@@ -503,7 +519,6 @@ function updateR(checkbox, intendedR) {
  function adjustSliderValue() {
      updateXFromSlider();
  }
-
 
 function updateXFromInput() {
     const input = document.getElementById('pointForm:xInput');
@@ -522,8 +537,6 @@ function updateXFromInput() {
     hidden.value = percent;
 
     if (slider) slider.setValue(percent);
-
-
 }
 
 function updateXFromSlider() {
@@ -537,5 +550,40 @@ function updateXFromSlider() {
     const rounded = Math.round(real * 100) / 100;
 
     input.value = rounded;
-
 }
+
+function updateClientTime() {
+    const now = new Date();
+    // Форматируем как dd.MM.yyyy HH:mm:ss
+    const day   = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year  = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins  = String(now.getMinutes()).padStart(2, '0');
+    const secs  = String(now.getSeconds()).padStart(2, '0');
+
+    const formatted = `${day}.${month}.${year} ${hours}:${mins}:${secs}`;
+    const span = document.getElementById('clientTime');
+    if (span) span.textContent = formatted;
+}
+
+// Первичный вывод сразу
+document.addEventListener('DOMContentLoaded', updateClientTime);
+
+// Обновление каждые 13 секунд
+setInterval(updateClientTime, 13000);
+
+// Дополнительно: можно отслеживать изменения системного времени через requestAnimationFrame для мгновенной реакции
+(function monitorSystemTime() {
+    let last = Date.now();
+    function tick() {
+        const now = Date.now();
+        // если системное время поменялось более чем на 1 секунду — обновляем моментально
+        if (Math.abs(now - last) > 2000) {
+            updateClientTime();
+        }
+        last = now;
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+})();

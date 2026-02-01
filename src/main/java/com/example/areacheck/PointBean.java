@@ -22,6 +22,20 @@ public class PointBean implements Serializable {
     private BigDecimal y = BigDecimal.ZERO;
     private double r = 3.0;
 
+    private String xRaw;
+
+    public String getxRaw() {
+        return xRaw;
+    }
+
+    public void setxRaw(String xRaw) {
+        this.xRaw = xRaw;
+        if (xRaw != null && !xRaw.isBlank()) {
+            this.x = new BigDecimal(xRaw.replace(',', '.'));
+        }
+    }
+
+
     public BigDecimal getX() {
         return x;
     }
@@ -161,8 +175,10 @@ public class PointBean implements Serializable {
         resultsBean.clear();
         x = BigDecimal.ZERO;
         y = BigDecimal.ZERO;
+        xRaw = null;
         syncR(3.0);
     }
+
 
 
     private boolean isHit(BigDecimal x, BigDecimal y, BigDecimal r) {
@@ -214,6 +230,11 @@ public class PointBean implements Serializable {
     public void setSliderPercent(int percent) {
         this.sliderPercent = Math.max(0, Math.min(100, percent));
 
+        // ❗ если пользователь уже ввёл X вручную — НИЧЕГО НЕ ДЕЛАЕМ
+        if (xRaw != null && !xRaw.isBlank()) {
+            return;
+        }
+
         BigDecimal rawX = BigDecimal.valueOf(-5)
                 .add(
                         BigDecimal.valueOf(sliderPercent)
@@ -221,7 +242,7 @@ public class PointBean implements Serializable {
                                 .multiply(BigDecimal.TEN)
                 );
 
-        // ⚠️ ВАЖНО: тут МОЖНО округлять, потому что это СЛАЙДЕР
         this.x = rawX.setScale(2, RoundingMode.HALF_UP);
     }
+
 }
