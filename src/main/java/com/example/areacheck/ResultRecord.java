@@ -37,7 +37,6 @@ public class ResultRecord implements Serializable {
         this.execMillis = execMillis;
     }
 
-
     public Long getId() {
         return id;
     }
@@ -56,7 +55,6 @@ public class ResultRecord implements Serializable {
         }
     }
 
-
     public BigDecimal getY() {
         return y;
     }
@@ -66,7 +64,6 @@ public class ResultRecord implements Serializable {
             this.y = y;
         }
     }
-
 
     public double getR() {
         return r;
@@ -121,6 +118,4 @@ public class ResultRecord implements Serializable {
         BigDecimal rounded = y.setScale(5, RoundingMode.HALF_UP);
         return rounded.stripTrailingZeros().toPlainString();
     }
-
-
 }

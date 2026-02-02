@@ -53,13 +53,13 @@ public class PointBean implements Serializable {
                 .max(BigDecimal.ZERO)
                 .min(BigDecimal.valueOf(100));
 
-        
+
         BigDecimal rawX = BigDecimal.valueOf(-5)
                 .add(percent
                         .divide(BigDecimal.valueOf(100), 20, RoundingMode.HALF_UP)
                         .multiply(BigDecimal.TEN));
 
-        this.x = rawX;   
+        this.x = rawX;
     }
 
 
@@ -79,7 +79,7 @@ public class PointBean implements Serializable {
     public void setR(double r) {
         this.r = r;
     }
-    
+
     public boolean isR1Selected() {
         return r1Selected;
     }
@@ -125,7 +125,7 @@ public class PointBean implements Serializable {
         this.r3Selected = selected;
     }
 
-    
+
     private void syncR(double value) {
         this.r = value;
         this.r1Selected = (value == 1.0);
@@ -135,14 +135,10 @@ public class PointBean implements Serializable {
         this.r3Selected = (value == 3.0);
     }
 
-    
+
     public void check() {
         boolean hit = false;
         try {
-
-
-
-
             long start = System.nanoTime();
             hit = isHit(x, y, BigDecimal.valueOf(r));
 
@@ -150,7 +146,7 @@ public class PointBean implements Serializable {
 
             LocalDateTime now = LocalDateTime.now();
             ResultRecord record = new ResultRecord(
-                    x,          
+                    x,
                     y,
                     r,
                     hit,
@@ -160,7 +156,6 @@ public class PointBean implements Serializable {
 
             resultsBean.add(record);
 
-            
             System.out.println("check() вызван: x=" + x + ", y=" + y + ", r=" + r + ", hit=" + hit);
         } catch (IllegalArgumentException e) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -183,7 +178,7 @@ public class PointBean implements Serializable {
 
     private boolean isHit(BigDecimal x, BigDecimal y, BigDecimal r) {
 
-        
+
         if (x.compareTo(BigDecimal.ZERO) >= 0 &&
                 y.compareTo(BigDecimal.ZERO) >= 0) {
 
@@ -193,7 +188,7 @@ public class PointBean implements Serializable {
             ) <= 0;
         }
 
-        
+
         if (x.compareTo(BigDecimal.ZERO) <= 0 &&
                 y.compareTo(BigDecimal.ZERO) >= 0) {
 
@@ -201,13 +196,13 @@ public class PointBean implements Serializable {
                     y.compareTo(r) <= 0;
         }
 
-        
+
         if (x.compareTo(BigDecimal.ZERO) < 0 &&
                 y.compareTo(BigDecimal.ZERO) < 0) {
             return false;
         }
 
-        
+
         if (x.compareTo(BigDecimal.ZERO) >= 0 &&
                 y.compareTo(BigDecimal.ZERO) <= 0) {
 
@@ -221,7 +216,7 @@ public class PointBean implements Serializable {
     }
 
 
-    private int sliderPercent = 100;  
+    private int sliderPercent = 100;
 
     public int getSliderPercent() {
         return sliderPercent;
@@ -230,7 +225,7 @@ public class PointBean implements Serializable {
     public void setSliderPercent(int percent) {
         this.sliderPercent = Math.max(0, Math.min(100, percent));
 
-        
+
         if (xRaw != null && !xRaw.isBlank()) {
             return;
         }
