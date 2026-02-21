@@ -89,8 +89,8 @@ class PointChecker {
             errorElement.textContent = 'Y должен быть числом';
             return false;
         }
-        if (numValue < -5 || numValue > 3) {
-            errorElement.textContent = 'Y должен быть в диапазоне от -5 до 3';
+        if (numValue < -5 || numValue > 5) {
+            errorElement.textContent = 'Y должен быть в диапазоне от -5 до 5';
             return false;
         }
         errorElement.textContent = '';

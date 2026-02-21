@@ -1,7 +1,9 @@
 package com.example.areacheck;
 
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.validator.ValidatorException;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -238,6 +240,21 @@ public class PointBean implements Serializable {
                 );
 
         this.x = rawX.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public void validateY(FacesContext context, UIComponent component, Object value) {
+        if (value == null) return;
+
+        BigDecimal yValue = (BigDecimal) value;
+
+        if (yValue.compareTo(BigDecimal.valueOf(-5)) < 0 ||
+                yValue.compareTo(BigDecimal.valueOf(5)) > 0) {
+
+            throw new ValidatorException(
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Ошибка",
+                            "Y должен быть от -5 до 5 включительно"));
+        }
     }
 
 }
